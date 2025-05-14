@@ -1,0 +1,9 @@
+.vscode
+.idea
+.DS_Store
+vendor
+app
+app.exe
+go-ems
+go-ems.exe
+*.log

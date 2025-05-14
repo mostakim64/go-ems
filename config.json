@@ -1,0 +1,37 @@
+{
+  "app": {
+    "name": "app",
+    "port": "8080"
+  },
+  "db": {
+    "host": "127.0.0.1",
+    "port": "3306",
+    "user": "********",
+    "pass": "*******",
+    "schema": "event_managment",
+    "maxIdleConn": 1,
+    "maxOpenConn": 2,
+    "maxConnLifetime": 30,
+    "debug": true
+  },
+  "redis": {
+    "host": "127.0.0.1",
+    "port": "******",
+    "pass": "*******",
+    "db": 2,
+    "mandatoryPrefix": "event_management_"
+  },
+  "asynq": {
+    "redisAddr": "127.0.0.1:6379",
+    "db": 15,
+    "pass": "*****",
+    "concurrency": 10,
+    "queue": "event-management",
+    "retention": 168,
+    "retryCount": 25,
+    "delay": 0
+  },
+  "logger": {
+    "filePath": "app.log"
+  }
+}

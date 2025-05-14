@@ -1,0 +1,15 @@
+USE event_management;
+
+DROP TABLE IF EXISTS events;
+
+CREATE TABLE events (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  location VARCHAR(255),
+  start_time DATETIME,
+  end_time DATETIME,
+  created_by VARCHAR(255),
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NULL ON UPDATE CURRENT_TIMESTAMP
+);

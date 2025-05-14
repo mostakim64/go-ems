@@ -1,0 +1,112 @@
+services:
+  consul:
+    image: consul:1.12
+    container_name: vivasoft-golang-course-consul
+    ports:
+      - "8501:8500"
+    networks:
+      - go-ems
+    post_start:
+      - command: "consul kv put app @/consul/data/config.prod.json"
+    volumes:
+      - ./env/config.prod.json:/consul/data/config.prod.json # Mount the production config file
+    restart: unless-stopped
+
+  mysql:
+    image: "mysql:8.0.21"
+    platform: linux/amd64  # Force x86 architecture for compatibility
+    container_name: vivasoft-golang-course-mysql
+    restart: unless-stopped
+    volumes:
+      - vivasoft_mysql_golang_course_local_db:/var/lib/mysql
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - MYSQL_USER=gladiator
+      - MYSQL_PASSWORD=gladius
+      - MYSQL_ROOT_PASSWORD=pass1234
+      - MYSQL_DATABASE=event_management
+    ports:
+      - "3307:3306"
+    expose:
+      - 3306
+    networks:
+      - go-ems
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppass1234"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  redis:
+    image: "bitnami/redis:6.0.9"
+    platform: linux/amd64  # Force x86 architecture for compatibility
+    container_name: vivasoft-golang-course-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    expose:
+      - 6379
+    environment:
+      - REDIS_PASSWORD=password123
+    volumes:
+      - type: volume
+        source: vivasoft_redis_golang_course_local_db
+        target: /bitnami/redis/data:rw
+    networks:
+      - go-ems
+
+  asynqmon:
+    image: hibiken/asynqmon:0.7
+    container_name: vivasoft-golang-course-asynqmon
+    platform: linux/amd64  # Force x86 architecture for compatibility
+    restart: unless-stopped
+    depends_on:
+      - redis
+    environment:
+      - REDIS_ADDR=redis-dev:6379
+      - REDIS_DB=15
+      - REDIS_PASSWORD=password123
+    ports:
+      - "9001:8080"
+    expose:
+      - "9000"
+    networks:
+      - go-ems
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: go-ems
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    expose:
+      - 8080
+    environment:
+      - CONSUL_URL=http://consul:8500
+      - CONSUL_PATH=app
+    volumes:
+      - ./app.log:/app.log
+    depends_on:
+      mysql:
+        condition: service_healthy
+      consul:
+        condition: service_started
+      redis:
+        condition: service_started
+    entrypoint: ["/app", "serve"]
+    networks:
+      - go-ems
+
+networks:
+  go-ems:
+    name: go-ems
+    driver: bridge
+
+volumes:
+  vivasoft_mysql_golang_course_local_db:
+    name: vivasoft-mysql-golang-course-local_db
+  vivasoft_redis_golang_course_local_db:
+    name: vivasoft-redis-golang-course-local_db
