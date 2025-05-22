@@ -10,11 +10,9 @@ import (
 	"github.com/vivasoft-ltd/golang-course-utils/logger"
 )
 
-var (
-	RootCmd = &cobra.Command{
-		Use: "app",
-	}
-)
+var RootCmd = &cobra.Command{
+	Use: "app",
+}
 
 func init() {
 	RootCmd.AddCommand(serveCmd)

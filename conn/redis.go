@@ -28,8 +28,6 @@ func ConnectRedis() {
 	logger.Info("redis connection successful...")
 }
 
-type RedisClient struct{}
-
-func NewRedisClient() *RedisClient {
-	return &RedisClient{}
+func Redis() *redis.Client {
+	return client
 }

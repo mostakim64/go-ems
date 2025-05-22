@@ -60,3 +60,28 @@ func RefreshTokenNotFound() Data {
 func EventNotFound() Data {
 	return NewMessage().Set("message", "Event not found").Done()
 }
+
+func UserAlreadyExists() Data {
+	return NewMessage().Set("message", "User already exists").Done()
+}
+
+func UserNotFound() Data {
+	return NewMessage().Set("message", "User not found").Done()
+}
+
+func InvalidLoginCredentials() Data {
+	return NewMessage().Set("message", "Invalid login credentials").Done()
+}
+
+// TODO: fix msg
+func UserUnauthorized() Data {
+	return NewMessage().Set("message", "User unauthorized").Done()
+}
+
+func UserUpdatedSuccessfully() Data {
+	return NewMessage().Set("message", "User updated successfully").Done()
+}
+
+func UserDeletedSuccessfully() Data {
+	return NewMessage().Set("message", "User deleted successfully").Done()
+}
