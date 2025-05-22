@@ -8,6 +8,7 @@ import (
 	"github.com/vivasoft-ltd/go-ems/config"
 	"github.com/vivasoft-ltd/go-ems/types"
 	"github.com/vivasoft-ltd/go-ems/utils/errutil"
+	"github.com/vivasoft-ltd/go-ems/utils/methodutil"
 	"github.com/vivasoft-ltd/golang-course-utils/logger"
 	"time"
 )
@@ -63,7 +64,7 @@ func (*TokenServiceImpl) CreateToken(userID int) (*types.Token, error) {
 }
 
 func (svc *TokenServiceImpl) ParseAccessToken(accessToken string) (*types.Token, error) {
-	parsedToken, err := ParseJwtToken(accessToken, config.Jwt().AccessTokenSecret)
+	parsedToken, err := methodutil.ParseJwtToken(accessToken, config.Jwt().AccessTokenSecret)
 	if err != nil {
 		return nil, errutil.ErrParseJwt
 	}
@@ -80,50 +81,15 @@ func (svc *TokenServiceImpl) ParseAccessToken(accessToken string) (*types.Token,
 	return mapClaimsToToken(claims)
 }
 
-// TODO: refactor
-func ParseJwtToken(token, secret string) (*jwt.Token, error) {
-	keyFunc := func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errutil.ErrInvalidJwtSigningMethod
-		}
-		return []byte(secret), nil
-	}
-
-	return jwt.Parse(token, keyFunc)
-}
-
-// TODO: refactor
-func mapClaimsToToken(claims jwt.MapClaims) (*types.Token, error) {
-	jsonData, err := json.Marshal(claims)
-	if err != nil {
-		return nil, err
-	}
-
-	// Unmarshal JSON to the Token struct
-	var token types.Token
-	err = json.Unmarshal(jsonData, &token)
-	if err != nil {
-		return nil, err
-	}
-
-	return &token, nil
-}
-
 func (svc *TokenServiceImpl) StoreTokenUUID(token *types.Token) error {
 	now := time.Now().Unix()
 
-	err := svc.redisSvc.Set(
-		config.Redis().MandatoryPrefix+config.Redis().AccessUuidPrefix+token.AccessUuid,
-		token.UserID, time.Duration(token.AccessExpiry-now),
-	)
+	err := svc.redisSvc.Set(methodutil.AccessUuidCacheKey(token.AccessUuid), token.UserID, time.Duration(token.AccessExpiry-now))
 	if err != nil {
 		return err
 	}
 
-	err = svc.redisSvc.Set(
-		config.Redis().MandatoryPrefix+config.Redis().RefreshUuidPrefix+token.RefreshUuid,
-		token.UserID, time.Duration(token.RefreshExpiry-now),
-	)
+	err = svc.redisSvc.Set(methodutil.RefreshUuidCacheKey(token.RefreshUuid), token.UserID, time.Duration(token.RefreshExpiry-now))
 	if err != nil {
 		return err
 	}
@@ -132,10 +98,7 @@ func (svc *TokenServiceImpl) StoreTokenUUID(token *types.Token) error {
 }
 
 func (svc *TokenServiceImpl) DeleteTokenUUID(token *types.Token) error {
-	err := svc.redisSvc.Del(
-		config.Redis().MandatoryPrefix+config.Redis().AccessUuidPrefix+token.AccessUuid,
-		config.Redis().MandatoryPrefix+config.Redis().RefreshUuidPrefix+token.RefreshUuid,
-	)
+	err := svc.redisSvc.Del(methodutil.AccessUuidCacheKey(token.AccessUuid), methodutil.RefreshUuidCacheKey(token.RefreshUuid))
 
 	if err != nil {
 		return err
@@ -145,9 +108,24 @@ func (svc *TokenServiceImpl) DeleteTokenUUID(token *types.Token) error {
 }
 
 func (svc *TokenServiceImpl) ReadUserIDFromAccessTokenUUID(accessTokenUuid string) (int, error) {
-	userID, err := svc.redisSvc.GetInt(config.Redis().MandatoryPrefix + config.Redis().AccessUuidPrefix + accessTokenUuid)
+	userID, err := svc.redisSvc.GetInt(methodutil.AccessUuidCacheKey(accessTokenUuid))
 	if err != nil {
 		return 0, err
 	}
 	return userID, nil
+}
+
+func mapClaimsToToken(claims jwt.MapClaims) (*types.Token, error) {
+	jsonData, err := json.Marshal(claims)
+	if err != nil {
+		return nil, err
+	}
+
+	var token types.Token
+	err = json.Unmarshal(jsonData, &token)
+	if err != nil {
+		return nil, err
+	}
+
+	return &token, nil
 }

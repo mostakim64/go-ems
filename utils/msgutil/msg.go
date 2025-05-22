@@ -73,9 +73,12 @@ func InvalidLoginCredentials() Data {
 	return NewMessage().Set("message", "Invalid login credentials").Done()
 }
 
-// TODO: fix msg
 func UserUnauthorized() Data {
 	return NewMessage().Set("message", "User unauthorized").Done()
+}
+
+func UserCreatedSuccessfully() Data {
+	return NewMessage().Set("message", "User created successfully").Done()
 }
 
 func UserUpdatedSuccessfully() Data {

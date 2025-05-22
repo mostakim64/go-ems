@@ -40,13 +40,10 @@ func (ctrl *UserController) Signup(c echo.Context) error {
 		}
 		return c.JSON(http.StatusInternalServerError, msgutil.SomethingWentWrongMsg())
 	}
-	// TODO: fix return msg
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "user created successfully",
-	})
+
+	return c.JSON(http.StatusCreated, msgutil.UserCreatedSuccessfully())
 }
 
-// TODO: proper error handling in all routes
 func (ctrl *UserController) Profile(c echo.Context) error {
 	user, err := middlewares.CurrentUserFromCtx(c)
 	if err != nil {
@@ -55,8 +52,13 @@ func (ctrl *UserController) Profile(c echo.Context) error {
 
 	resp, err := ctrl.userSvc.ReadUser(user.ID, false)
 	if err != nil {
+		switch {
+		case errors.Is(err, errutil.ErrUserNotFound):
+			return c.JSON(http.StatusNotFound, msgutil.UserNotFound())
+		}
 		return c.JSON(http.StatusInternalServerError, msgutil.SomethingWentWrongMsg())
 	}
+
 	return c.JSON(http.StatusOK, resp)
 }
 
@@ -79,10 +81,7 @@ func (ctrl *UserController) CreateUser(c echo.Context) error {
 		}
 		return c.JSON(http.StatusInternalServerError, msgutil.SomethingWentWrongMsg())
 	}
-	// TODO: fix return msg
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "user created successfully",
-	})
+	return c.JSON(http.StatusCreated, msgutil.UserCreatedSuccessfully())
 }
 
 func (ctrl *UserController) UpdateUser(c echo.Context) error {

@@ -10,6 +10,7 @@ import (
 	"github.com/vivasoft-ltd/go-ems/models"
 	"github.com/vivasoft-ltd/go-ems/types"
 	"github.com/vivasoft-ltd/go-ems/utils/errutil"
+	"github.com/vivasoft-ltd/go-ems/utils/methodutil"
 	"github.com/vivasoft-ltd/golang-course-utils/logger"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -40,6 +41,7 @@ func (svc *UserServiceImpl) CreateUser(req *types.CreateUserReq) error {
 
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
+		logger.Error(fmt.Sprintf("error occurred: [%v] while generating password hash", err))
 		return err
 	}
 
@@ -52,6 +54,7 @@ func (svc *UserServiceImpl) CreateUser(req *types.CreateUserReq) error {
 	}
 
 	if _, err := svc.repo.CreateUser(user); err != nil {
+		logger.Error(fmt.Sprintf("error occurred: [%v] while creating user, email: [%s]", err, user.Email))
 		return err
 	}
 
@@ -70,11 +73,12 @@ func (svc *UserServiceImpl) UpdateUser(req *types.UpdateUserReq) error {
 	}
 
 	if err := svc.repo.UpdateUser(user); err != nil {
+		logger.Error(fmt.Sprintf("error occurred: [%v] while updating user, user id: [%d]", err, user.ID))
 		return err
 	}
 
 	go func() {
-		if err := svc.redisSvc.Del(config.Redis().MandatoryPrefix + config.Redis().UserPrefix + strconv.Itoa(user.ID)); err != nil {
+		if err := svc.redisSvc.Del(methodutil.UserCacheKey(existingUser.ID)); err != nil {
 			logger.Error(err)
 		}
 	}()
@@ -93,7 +97,7 @@ func (svc *UserServiceImpl) DeleteUser(id int) error {
 	}
 
 	go func() {
-		if err := svc.redisSvc.Del(config.Redis().MandatoryPrefix + config.Redis().UserPrefix + strconv.Itoa(id)); err != nil {
+		if err := svc.redisSvc.Del(methodutil.UserCacheKey(existingUser.ID)); err != nil {
 			logger.Error(err)
 		}
 	}()
@@ -104,6 +108,7 @@ func (svc *UserServiceImpl) DeleteUser(id int) error {
 func (svc *UserServiceImpl) IsEmailExist(email string) (bool, error) {
 	count, err := svc.repo.UserCountByEmail(email)
 	if err != nil {
+		logger.Error(fmt.Sprintf("error occurred: [%v] while fetching user by email", err))
 		return false, err
 	}
 
@@ -130,8 +135,9 @@ func (svc *UserServiceImpl) ReadUser(id int, fromCache bool) (*types.UserInfo, e
 
 func (svc *UserServiceImpl) readUserFromCache(id int) (*types.UserInfo, error) {
 	var user *types.UserInfo
-	err := svc.redisSvc.GetStruct(config.Redis().MandatoryPrefix+config.Redis().UserPrefix+strconv.Itoa(id), &user)
+	err := svc.redisSvc.GetStruct(methodutil.UserCacheKey(id), &user)
 	if err != nil && !errors.Is(err, redis.Nil) {
+		logger.Error(fmt.Sprintf("error occurred: [%v] while fetching user from cache by user id: [%d]", err, id))
 		return nil, err
 	}
 
@@ -145,6 +151,7 @@ func (svc *UserServiceImpl) readUserFromCache(id int) (*types.UserInfo, error) {
 func (svc *UserServiceImpl) readUserFromDB(id int) (*types.UserInfo, error) {
 	user, err := svc.repo.ReadUserById(id)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		logger.Error(fmt.Sprintf("error occurred: [%v] while fetching user by user id: [%d]", err, id))
 		return nil, err
 	}
 
@@ -162,9 +169,8 @@ func (svc *UserServiceImpl) readUserFromDB(id int) (*types.UserInfo, error) {
 	}, nil
 }
 
-// TODO: refactor redis key
 func (svc *UserServiceImpl) StoreInCache(user *types.UserInfo) error {
-	if err := svc.redisSvc.SetStruct(config.Redis().MandatoryPrefix+config.Redis().UserPrefix+strconv.Itoa(user.ID), user, config.Redis().UserCacheTTL); err != nil {
+	if err := svc.redisSvc.SetStruct(methodutil.UserCacheKey(user.ID), user, config.Redis().UserCacheTTL); err != nil {
 		logger.Error(fmt.Sprintf("could not cache user in redis, id: [%d], err: [%v]", user.ID, err))
 	}
 	return nil
@@ -196,6 +202,7 @@ func (svc *UserServiceImpl) readPermissionFromCache(roleID int) ([]*models.Permi
 	var permissions []*models.Permission
 	err := svc.redisSvc.GetStruct(config.Redis().MandatoryPrefix+config.Redis().PermissionPrefix+strconv.Itoa(roleID), &permissions)
 	if err != nil && !errors.Is(err, redis.Nil) {
+		logger.Error(err)
 		return nil, err
 	}
 
@@ -203,132 +210,19 @@ func (svc *UserServiceImpl) readPermissionFromCache(roleID int) ([]*models.Permi
 }
 
 func (svc *UserServiceImpl) storePermissionInCache(roleID int, permissions []*models.Permission) error {
-	if err := svc.redisSvc.SetStruct(config.Redis().MandatoryPrefix+config.Redis().PermissionPrefix+strconv.Itoa(roleID), permissions, config.Redis().PermissionCacheTTL); err != nil {
+	if err := svc.redisSvc.SetStruct(methodutil.PermissionCacheKey(roleID), permissions, config.Redis().PermissionCacheTTL); err != nil {
 		logger.Error(fmt.Sprintf("could not cache permissions in redis, role_id: [%d], err: [%v]", roleID, err))
 		return err
 	}
 	return nil
 }
 
-//	func (service *Service) UpdateUser(req types.UserUpdateReq) error {
-//		userUpdReq := domain.User{
-//			ID:        req.ID,
-//			UserName:  req.UserName,
-//			FirstName: req.FirstName,
-//			LastName:  req.LastName,
-//			Phone:     req.Phone,
-//		}
-//
-//		err := service.repo.UpdateUser(userUpdReq)
-//		if err != nil {
-//			slog.Error("failed to update user", "error", err)
-//			return fmt.Errorf("failed to update user: %w", err)
-//		}
-//		return nil
-//	}
-//
-//	func (service *Service) ReadUserByEmail(email string) (types.UserRolePermissionsInfo, error) {
-//		userPermissions, err := service.repo.GetUserPermissionsByEmail(email)
-//		if err != nil {
-//			return types.UserRolePermissionsInfo{}, err
-//		}
-//		if len(userPermissions) <= 0 {
-//			return types.UserRolePermissionsInfo{}, nil
-//		}
-//
-//		user := userPermissions[0]
-//
-//		resp := types.UserRolePermissionsInfo{
-//			ID:       user.ID,
-//			UserName: user.UserName,
-//			Email:    user.Email,
-//			Role:     user.RoleName,
-//			Password: user.Password,
-//		}
-//
-//		permissions := []string{}
-//		for _, userPerm := range userPermissions {
-//			permissions = append(permissions, userPerm.PermissionName)
-//		}
-//
-//		resp.Permissions = permissions
-//
-//		return resp, nil
-//	}
-//
-//	func (service *Service) AssignRoleToUser(req types.AssignRoleRequest) error {
-//		userRoleReq := []domain.UserRole{}
-//		for _, roleID := range req.RoleIDs {
-//			userRoleReq = append(userRoleReq, domain.UserRole{
-//				UserID: req.ID,
-//				RoleID: roleID,
-//			})
-//		}
-//
-//		return service.repo.AssignRoleToUser(userRoleReq)
-//	}
-//
-//	func (service *Service) GetUserRoles(userID int) (types.UserRolesResp, error) {
-//		response := types.UserRolesResp{}
-//		userRoles, err := service.repo.GetUserRoles([]int{userID})
-//		if err != nil {
-//			return response, err
-//		}
-//
-//		if len(userRoles) <= 0 {
-//			return response, nil
-//		}
-//		response.ID = userRoles[0].UserID
-//		response.Roles = make([]types.RoleResponse, len(userRoles))
-//
-//		for i, userRole := range userRoles {
-//			response.Roles[i] = types.RoleResponse{
-//				ID:          userRole.UserID,
-//				Name:        userRole.RoleName,
-//				Description: userRole.RoleDescription,
-//			}
-//		}
-//
-//		return response, nil
-//	}
-//
-// func (service *Service) DeleteUserRole(req types.DeleteUserRoleReq) error {
-//
-//		deleteUserRoleReq := domain.DeleteUserRoleReq{
-//			UserID: req.ID,
-//			RoleID: req.RoleID,
-//		}
-//		err := service.repo.DeleteUserRole(deleteUserRoleReq)
-//		if err != nil {
-//			slog.Error("failed to delete user role", "error", err)
-//			return fmt.Errorf("failed to delete user role: %w", err)
-//		}
-//		return nil
-//	}
-//
-//	func (service *Service) DeleteUser(userID int) error {
-//		err := service.repo.DeleteUser(userID)
-//		if err != nil {
-//			slog.Error("failed to delete user", "error", err)
-//			return fmt.Errorf("failed to delete user: %w", err)
-//		}
-//		return nil
-//	}
-//
-//	func (service *Service) ReadUser(userID int) (types.UserResp, error) {
-//		user, err := service.repo.ReadUser(userID)
-//		if err != nil {
-//			slog.Error("failed to get user", "error", err)
-//			return types.UserResp{}, fmt.Errorf("failed to get user: %w", err)
-//		}
-//		resp := mapToUserResponse(user)
-//		return resp, nil
-//	}
 func (svc *UserServiceImpl) ListUsers(req types.ListUserReq) (*types.PaginatedUserResp, error) {
 	offset := (req.Page - 1) * req.Limit
 
 	users, total, err := svc.repo.ReadPaginatedUsers(req.Limit, offset)
 	if err != nil {
+		logger.Error(fmt.Errorf("error occurred: [%v] while fetching paginated users", err))
 		return nil, err
 	}
 
@@ -345,65 +239,3 @@ func (svc *UserServiceImpl) ListUsers(req types.ListUserReq) (*types.PaginatedUs
 
 	return resp, nil
 }
-
-//func (service *Service) GetUserPermissionsByID(userID int) (types.UserWithParamsResp, error) {
-//	userPermissions, err := service.repo.GetUserPermissionsByID(userID)
-//	if err != nil {
-//		return types.UserWithParamsResp{}, err
-//	}
-//	if len(userPermissions) <= 0 {
-//		return types.UserWithParamsResp{}, nil
-//	}
-//
-//	user := userPermissions[0]
-//
-//	resp := types.UserWithParamsResp{
-//		CurrentUser: types.CurrentUser{
-//			ID:       user.ID,
-//			Email:    user.Email,
-//			UserName: user.UserName,
-//		},
-//		Role: user.RoleName,
-//	}
-//
-//	permissions := []string{}
-//	for _, userPerm := range userPermissions {
-//		permissions = append(permissions, userPerm.PermissionName)
-//	}
-//
-//	resp.Permissions = permissions
-//
-//	return resp, nil
-//}
-//
-//func (service *Service) ResetPassword(req types.ResetPasswordReq) error {
-//
-//	hashedPass, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
-//	if err != nil {
-//		return err
-//	}
-//
-//	resetPasswordReq := domain.ResetPasswordReq{
-//		ID:       req.ID,
-//		Password: string(hashedPass),
-//	}
-//	err = service.repo.ResetPassword(resetPasswordReq)
-//	if err != nil {
-//		slog.Error("failed to reset password", "error", err)
-//		return fmt.Errorf("failed to reset password: %w", err)
-//	}
-//	return nil
-//}
-//
-//func mapToUserResponse(user domain.UserResp) types.UserResp {
-//	resp := types.UserResp{
-//		ID:        user.ID,
-//		UserName:  user.UserName,
-//		FirstName: user.FirstName,
-//		LastName:  user.LastName,
-//		Email:     user.Email,
-//		Phone:     user.Phone,
-//		Password:  user.Password,
-//	}
-//	return resp
-//}

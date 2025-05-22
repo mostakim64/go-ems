@@ -43,7 +43,6 @@ func (r *Routes) Init() {
 	users := g.Group("/users")
 	users.POST("/signup", r.userCtrl.Signup)
 	users.GET("/profile", r.userCtrl.Profile, r.authMiddleware.Authenticate(""))
-
 	users.POST("", r.userCtrl.CreateUser, r.authMiddleware.Authenticate(consts.PermissionUserCreate))
 	users.GET("", r.userCtrl.ListUsers, r.authMiddleware.Authenticate(consts.PermissionUserList))
 	users.GET("/:id", r.userCtrl.ReadUser, r.authMiddleware.Authenticate(consts.PermissionUserFetch))
