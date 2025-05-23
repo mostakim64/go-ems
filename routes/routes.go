@@ -34,11 +34,11 @@ func (r *Routes) Init() {
 
 	g := e.Group("/v1")
 
-	g.POST("/events", r.eventCtrl.CreateEvent)
-	g.GET("/events", r.eventCtrl.ListEvents)
-	g.GET("/events/:id", r.eventCtrl.ReadEventByID)
-	g.PUT("/events/:id", r.eventCtrl.UpdateEvent)
-	g.DELETE("/events/:id", r.eventCtrl.DeleteEvent)
+	g.POST("/events", r.eventCtrl.CreateEvent, r.authMiddleware.Authenticate(consts.PermissionEventCreate))
+	g.GET("/events", r.eventCtrl.ListEvents, r.authMiddleware.Authenticate(consts.PermissionEventList))
+	g.GET("/events/:id", r.eventCtrl.ReadEventByID, r.authMiddleware.Authenticate(consts.PermissionEventFetch))
+	g.PUT("/events/:id", r.eventCtrl.UpdateEvent, r.authMiddleware.Authenticate(consts.PermissionEventUpdate))
+	g.DELETE("/events/:id", r.eventCtrl.DeleteEvent, r.authMiddleware.Authenticate(consts.PermissionEventDelete))
 
 	users := g.Group("/users")
 	users.POST("/signup", r.userCtrl.Signup)

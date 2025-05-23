@@ -14,7 +14,7 @@ type (
 		Location    *string `json:"location"`
 		StartTime   *string `json:"start_time"`
 		EndTime     *string `json:"end_time"`
-		CreatedBy   *string `json:"created_by"`
+		CreatedBy   int     `json:"created_by"`
 	}
 
 	UpdateEventRequest struct {
@@ -44,7 +44,6 @@ func (cereq *CreateEventRequest) Validate() error {
 		v.Field(&cereq.Location, v.When(cereq.Location != nil, v.Length(0, 255))),
 		v.Field(&cereq.StartTime, v.When(cereq.StartTime != nil, v.Date(time.RFC3339))),
 		v.Field(&cereq.EndTime, v.When(cereq.EndTime != nil, v.Date(time.RFC3339))),
-		v.Field(&cereq.CreatedBy, v.When(cereq.CreatedBy != nil, v.Length(0, 255))),
 	)
 }
 

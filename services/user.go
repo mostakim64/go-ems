@@ -118,8 +118,13 @@ func (svc *UserServiceImpl) IsEmailExist(email string) (bool, error) {
 
 func (svc *UserServiceImpl) ReadUserByEmail(email string) (*models.User, error) {
 	user, err := svc.repo.ReadUserByEmail(email)
-	if err != nil {
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		logger.Error(fmt.Sprintf("error occurred: [%v] while fetching user by user email: [%s]", err, email))
 		return nil, err
+	}
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, errutil.ErrUserNotFound
 	}
 
 	return user, nil

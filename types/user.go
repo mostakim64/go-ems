@@ -63,7 +63,7 @@ func (crq *CreateUserReq) Validate() error {
 		v.Field(&crq.Password, v.Required),
 		v.Field(&crq.FirstName, v.Required, v.Length(0, 50)),
 		v.Field(&crq.LastName, v.Required, v.Length(0, 50)),
-		v.Field(&crq.RoleID, v.Required, v.In(consts.RoleIdAdmin, consts.RoleIdManager, consts.RoleAttendee)),
+		v.Field(&crq.RoleID, v.Required, v.In(consts.RoleIdAdmin, consts.RoleIdManager, consts.RoleIdAttendee)),
 	)
 }
 

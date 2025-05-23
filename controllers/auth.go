@@ -35,6 +35,7 @@ func (ctrl *AuthController) Login(c echo.Context) error {
 	if err != nil {
 		switch {
 		case errors.Is(err, errutil.ErrUserNotFound):
+			return c.JSON(http.StatusUnauthorized, msgutil.InvalidLoginCredentials())
 		case errors.Is(err, errutil.ErrInvalidLoginCredentials):
 			return c.JSON(http.StatusUnauthorized, msgutil.InvalidLoginCredentials())
 		}

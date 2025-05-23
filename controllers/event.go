@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"errors"
+	"github.com/vivasoft-ltd/go-ems/middlewares"
 	"net/http"
 	"strconv"
 
@@ -36,6 +37,12 @@ func (ctrl *EventController) CreateEvent(c echo.Context) error {
 			Error: err,
 		})
 	}
+
+	user, err := middlewares.CurrentUserFromCtx(c)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, msgutil.UserUnauthorized())
+	}
+	req.CreatedBy = user.ID
 
 	resp, err := ctrl.eventSvc.CreateEvent(&req)
 	if err != nil {
