@@ -6,9 +6,9 @@
   "db": {
     "host": "127.0.0.1",
     "port": "3306",
-    "user": "********",
-    "pass": "*******",
-    "schema": "event_managment",
+    "user": "root",
+    "pass": "root",
+    "schema": "event_management",
     "maxIdleConn": 1,
     "maxOpenConn": 2,
     "maxConnLifetime": 30,
@@ -16,10 +16,16 @@
   },
   "redis": {
     "host": "127.0.0.1",
-    "port": "******",
-    "pass": "*******",
-    "db": 2,
-    "mandatoryPrefix": "event_management_"
+    "port": "6379",
+    "pass": "",
+    "db": 0,
+    "mandatoryPrefix": "event_management_",
+    "accessUuidPrefix": "access-uuid_",
+    "refreshUuidPrefix": "refresh-uuid_",
+    "userPrefix": "user_",
+    "permissionPrefix": "permissions_",
+    "userCacheTTL": 3600,
+    "permissionCacheTTL": 86400
   },
   "asynq": {
     "redisAddr": "127.0.0.1:6379",
@@ -33,5 +39,11 @@
   },
   "logger": {
     "filePath": "app.log"
+  },
+  "jwt": {
+    "accessTokenSecret":  "access_token",
+    "refreshTokenSecret":  "refresh_token",
+    "accessTokenExpiry": 3600,
+    "refreshTokenExpiry": 3600
   }
 }
