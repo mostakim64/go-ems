@@ -1,0 +1,467 @@
+{
+	"info": {
+		"_postman_id": "4527473f-9cc6-4726-92fb-2717766aac27",
+		"name": "Go-ems",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25370337"
+	},
+	"item": [
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Signup",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"karim@eample.com\",\n    \"password\": \"12345\",\n    \"first_name\": \"karim\",\n    \"last_name\": \"islam\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/v1/users/signup",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"v1",
+								"users",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhaWQiOiI5OWU2ZGNkNC04ZGEwLTQxYzgtOGY3ZC03OGVkYTZlYzg0ZmMiLCJleHAiOjE3NDgxNzUxOTAsInJpZCI6Ijg1NDhhYTM1LTkxNTMtNDg2Zi05OTYxLTEyNjg3YTU0ZDk1MiIsInVpZCI6Mn0.OLFb9Ij0aXFuHEJw6ibqDjXiYmlz6zZqSoHH3SLUflA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"manager3@vivasoftltd.com\",\n    \"password\": \"12345\",\n    \"first_name\": \"Event\",\n    \"last_name\": \"Manager\",\n    \"role_id\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/v1/users/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"v1",
+								"users",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhaWQiOiJkNjFlYWIxNi0xNzBiLTRkMjYtODA1MS0yYjNlY2RjNzFiNDciLCJleHAiOjE3NDc5MjMzMzIsInJpZCI6ImRhOGVmMGFiLWZlNDktNDYwNC1iMzBiLTQ5MGQyY2Q4Zjg4ZCIsInVpZCI6MX0.D24K8YCqz2swNnmr3EzNikqFP-XbOOt2Dn7GSc9Xupw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"manager@vivasoftltd.com\",\n    \"password\": \"12345\",\n    \"first_name\": \"Event3\",\n    \"last_name\": \"Manager\",\n    \"role_id\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/v1/users/5",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"v1",
+								"users",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhaWQiOiJlZDVjMDhmNi04YzZlLTQxNGUtOGNmYi0xYTA2NDE4MDQ0ZGMiLCJleHAiOjE3NDc5MTc0NDQsInJpZCI6IjlkYWExYjc1LTg5YzgtNGYyNS04NTM3LTZiN2UwMzQ1MDMyMiIsInVpZCI6MX0.eM324_LNV4FffLeBLilJM-naF4Jn-NNDaOdrLV7bnL0",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/v1/users/5",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"v1",
+								"users",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/v1/users/6",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"v1",
+								"users",
+								"6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Paginated Users",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhaWQiOiIxYjIzYzdmYS0zMTRhLTQ3ZmItYjVkZC0wNGIyYmU4ZDZiZjIiLCJleHAiOjE3NDgwMTg2MjcsInJpZCI6IjI3ZjllYjYyLThiY2EtNGIyZS1iNDA1LWFlOTJhMjg5NGIxZiIsInVpZCI6Nn0.4zvvLkVe0NLZTnZeZ4XFKVvKzTkXFcY5K1ZWFB_IYuM",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/v1/users/?limit=100&page=1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"v1",
+								"users",
+								""
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "100"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhaWQiOiI5Yzc0OTk4OC0wZWE0LTQ5ZmItYTk1My01OTI3MDM5NTQyMTgiLCJleHAiOjE3NDgxNzQ4MjQsInJpZCI6ImFkMTM3ZWE4LTI1MGUtNGQzOS04YjljLTY2YTg4OGVmZjAzMSIsInVpZCI6MX0.Upi32aiyHJhnyvPeCtUAXfx9ZBID_oyaM5dWLs2B9wE",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/v1/users/profile",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"v1",
+								"users",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"john@eample.com\",\n    \"password\": \"12345\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/v1/auth/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/v1/auth/logout",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"v1",
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "events",
+			"item": [
+				{
+					"name": "Create Event",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhaWQiOiIzMjgxMzEzNi05ZGI2LTQwM2ItYWViZi1kOGQwZDg1NmNkMjAiLCJleHAiOjE3NDgwMjEzMTgsInJpZCI6IjIyMWJkOTdmLTE5YjEtNDFhYi1hZjJmLWVjNzk4OTVkOWQzYyIsInVpZCI6Mn0.qpl5hLiiMBpX3LRjt5wnjYvp_5lJiVOL4JYN8N2_jLM",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Project Structure kickoff\",\n  \"description\": \"Introduction to the course. Incebreaking seesion for trainer and students\",\n  \"location\": \"Office\",\n  \"start_time\": \"2025-05-14T10:00:00Z\",\n  \"end_time\": \"2025-05-14T11:00:00Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/v1/events",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"v1",
+								"events"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Read Event By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/v1/events/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"v1",
+								"events",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Event",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Golang Course Class:6\",\n  \"description\": \"Project Structure kickoff\",\n  \"location\": \"Office\",\n  \"start_time\": \"2025-05-14T10:00:00Z\",\n  \"end_time\": \"2025-05-14T11:00:00Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/v1/events/2",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"v1",
+								"events",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Event",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/v1/events/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"v1",
+								"events",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Events",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/v1/events",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"v1",
+								"events"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

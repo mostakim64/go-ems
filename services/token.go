@@ -82,14 +82,12 @@ func (svc *TokenServiceImpl) ParseAccessToken(accessToken string) (*types.Token,
 }
 
 func (svc *TokenServiceImpl) StoreTokenUUID(token *types.Token) error {
-	now := time.Now().Unix()
-
-	err := svc.redisSvc.Set(methodutil.AccessUuidCacheKey(token.AccessUuid), token.UserID, time.Duration(token.AccessExpiry-now))
+	err := svc.redisSvc.Set(methodutil.AccessUuidCacheKey(token.AccessUuid), token.UserID, time.Duration(token.AccessExpiry))
 	if err != nil {
 		return err
 	}
 
-	err = svc.redisSvc.Set(methodutil.RefreshUuidCacheKey(token.RefreshUuid), token.UserID, time.Duration(token.RefreshExpiry-now))
+	err = svc.redisSvc.Set(methodutil.RefreshUuidCacheKey(token.RefreshUuid), token.UserID, time.Duration(token.RefreshExpiry))
 	if err != nil {
 		return err
 	}
