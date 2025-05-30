@@ -27,7 +27,7 @@ func serve(cmd *cobra.Command, args []string) {
 
 	// services
 	redisSvc := services.NewRedisService(redisClient)
-	eventSvc := services.NewEventServiceImpl(dbRepo)
+	eventSvc := services.NewEventServiceImpl(dbRepo, dbRepo)
 	userSvc := services.NewUserServiceImpl(redisSvc, dbRepo)
 	tokenSvc := services.NewTokenServiceImpl(redisSvc)
 	authSvc := services.NewAuthServiceImpl(userSvc, tokenSvc)

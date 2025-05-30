@@ -15,6 +15,9 @@ type (
 		StartTime   *string `json:"start_time"`
 		EndTime     *string `json:"end_time"`
 		CreatedBy   int     `json:"created_by"`
+		IsPublic    *bool   `json:"is_public"`
+		Limit       *int    `json:"limit,omitempty"`
+		Attendees   []int   `json:"attendees"`
 	}
 
 	UpdateEventRequest struct {
@@ -35,7 +38,23 @@ type (
 		Message string        `json:"message"`
 		Event   *models.Event `json:"event"`
 	}
+	RsvpEventRequest struct {
+		EventID int  `json:"event_id" param:"id"`
+		UserID  int  `json:"user_id"`
+		Rsvp    bool `json:"rsvp"`
+	}
+	EventFilter struct {
+		CreatedBy *int  `query:"created_by"`
+		Attendee  *int  `query:"attendee"`
+		IsPublic  *bool `query:"is_public"`
+	}
 )
+
+func (r *RsvpEventRequest) Validate() error {
+	return v.ValidateStruct(r,
+		v.Field(&r.EventID, v.Required),
+	)
+}
 
 func (cereq *CreateEventRequest) Validate() error {
 	return v.ValidateStruct(cereq,
@@ -44,6 +63,7 @@ func (cereq *CreateEventRequest) Validate() error {
 		v.Field(&cereq.Location, v.When(cereq.Location != nil, v.Length(0, 255))),
 		v.Field(&cereq.StartTime, v.When(cereq.StartTime != nil, v.Date(time.RFC3339))),
 		v.Field(&cereq.EndTime, v.When(cereq.EndTime != nil, v.Date(time.RFC3339))),
+		v.Field(&cereq.Attendees, v.When(cereq.IsPublic == nil || (cereq.IsPublic != nil && !*cereq.IsPublic), v.Required, v.Length(1, 0))),
 	)
 }
 
@@ -60,6 +80,8 @@ func (cereq *CreateEventRequest) ToEvent() *models.Event {
 		Description: cereq.Description,
 		Location:    cereq.Location,
 		CreatedBy:   cereq.CreatedBy,
+		IsPublic:    cereq.IsPublic,
+		Limit:       cereq.Limit,
 	}
 	if cereq.StartTime != nil {
 		event.StartTime, _ = parseTime(*cereq.StartTime, time.RFC3339)

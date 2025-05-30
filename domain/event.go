@@ -8,17 +8,20 @@ import (
 type (
 	EventRepository interface {
 		CreateEvent(event *models.Event) (*models.Event, error)
-		ListEvents() ([]*models.Event, error)
+		ListEvents(filter *types.EventFilter) ([]*models.Event, error)
 		ReadEventByID(id int) (*models.Event, error)
 		UpdateEvent(event *models.Event) (*models.Event, error)
 		DeleteEvent(id int) error
+		ReadEventInvitation(event int, userID int) (*models.EventAttendee, error)
+		UpsertEventInvitation(event *models.EventAttendee) error
 	}
 
 	EventService interface {
 		CreateEvent(eventReq *types.CreateEventRequest) (*types.CreateEventResponse, error)
-		ListEvents() ([]*models.Event, error)
+		ListEvents(user *types.CurrentUser) ([]*models.Event, error)
 		ReadEventByID(id int) (*models.Event, error)
 		DeleteEvent(id int) (*types.DeleteEventResponse, error)
 		UpdateEvent(eventReq *types.UpdateEventRequest) (*types.UpdateEventResponse, error)
+		RsvpEvent(request types.RsvpEventRequest) error
 	}
 )

@@ -32,7 +32,9 @@ func JwtCreateErrorMsg() Data {
 func SomethingWentWrongMsg() Data {
 	return NewMessage().Set("message", "Something went wrong").Done()
 }
-
+func EventRSVPedSuccessfully() Data {
+	return NewMessage().Set("message", "Event RSVPed successfully").Done()
+}
 func ExpectationFailedMsg() Data {
 	return NewMessage().Set("message", "Expectation failed").Done()
 }
@@ -59,6 +61,9 @@ func RefreshTokenNotFound() Data {
 
 func EventNotFound() Data {
 	return NewMessage().Set("message", "Event not found").Done()
+}
+func EventNotAllowed() Data {
+	return NewMessage().Set("message", "User is not allowed to participate in this event").Done()
 }
 
 func UserAlreadyExists() Data {

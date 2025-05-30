@@ -36,9 +36,11 @@ func (r *Routes) Init() {
 
 	g.POST("/events", r.eventCtrl.CreateEvent, r.authMiddleware.Authenticate(consts.PermissionEventCreate))
 	g.GET("/events", r.eventCtrl.ListEvents, r.authMiddleware.Authenticate(consts.PermissionEventList))
+	g.GET("/events/public", r.eventCtrl.ListPublicEvents)
 	g.GET("/events/:id", r.eventCtrl.ReadEventByID, r.authMiddleware.Authenticate(consts.PermissionEventFetch))
 	g.PUT("/events/:id", r.eventCtrl.UpdateEvent, r.authMiddleware.Authenticate(consts.PermissionEventUpdate))
 	g.DELETE("/events/:id", r.eventCtrl.DeleteEvent, r.authMiddleware.Authenticate(consts.PermissionEventDelete))
+	g.POST("/events/:id/rsvp", r.eventCtrl.Rsvp, r.authMiddleware.Authenticate(""))
 
 	users := g.Group("/users")
 	users.POST("/signup", r.userCtrl.Signup)
@@ -48,6 +50,7 @@ func (r *Routes) Init() {
 	users.GET("/:id", r.userCtrl.ReadUser, r.authMiddleware.Authenticate(consts.PermissionUserFetch))
 	users.PUT("/:id", r.userCtrl.UpdateUser, r.authMiddleware.Authenticate(consts.PermissionUserUpdate))
 	users.DELETE("/:id", r.userCtrl.DeleteUser, r.authMiddleware.Authenticate(consts.PermissionUserDelete))
+	users.GET("/attendees", r.userCtrl.ListAttendees, r.authMiddleware.Authenticate(consts.PermissionListAttendee))
 
 	auth := g.Group("/auth")
 	auth.POST("/login", r.authCtrl.Login)

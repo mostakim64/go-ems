@@ -12,7 +12,7 @@ func (repo *Repository) CreateUser(user *models.User) (*models.User, error) {
 
 func (repo *Repository) ReadUserById(id int) (*models.User, error) {
 	var user models.User
-	if err := repo.client.Model(&models.User{}).Where("id = ?", id).First(&user).Error; err != nil {
+	if err := repo.client.Preload("Events").Model(&models.User{}).Where("id = ?", id).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
@@ -77,4 +77,26 @@ func (repo *Repository) DeleteUser(id int) error {
 		return err
 	}
 	return nil
+}
+func (repo *Repository) ReadUsers(ids []int) ([]models.User, error) {
+	var users []models.User
+	if err := repo.client.Model(&models.User{}).Where("id IN (?)", ids).Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
+func (repo *Repository) ListAttendees(filter *types.AttendeeFilter) ([]types.AttendeeResp, error) {
+	var users []types.AttendeeResp
+	query := repo.client.Model(&models.User{})
+	if filter != nil {
+		if filter.RoleID != 0 {
+			query = query.Where("role_id =  ?", filter.RoleID)
+		}
+	}
+	if err := query.Find(&users).Error; err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }

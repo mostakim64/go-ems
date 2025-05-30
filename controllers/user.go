@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"errors"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/vivasoft-ltd/go-ems/consts"
 	"github.com/vivasoft-ltd/go-ems/domain"
@@ -63,6 +64,7 @@ func (ctrl *UserController) Profile(c echo.Context) error {
 }
 
 func (ctrl *UserController) CreateUser(c echo.Context) error {
+	fmt.Println("here")
 	var req types.CreateUserReq
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, msgutil.InvalidRequestMsg())
@@ -172,4 +174,17 @@ func (ctrl *UserController) ListUsers(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, resp)
+}
+
+func (ctrl *UserController) ListAttendees(c echo.Context) error {
+	user, err := middlewares.CurrentUserFromCtx(c)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, msgutil.UserUnauthorized())
+	}
+	users, err := ctrl.userSvc.ListAttendees(*user)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, msgutil.SomethingWentWrongMsg())
+	}
+
+	return c.JSON(http.StatusOK, users)
 }

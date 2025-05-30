@@ -151,9 +151,9 @@ func setDefaultConfig() {
 	config.DB = &DbConfig{
 		Host:            "127.0.0.1",
 		Port:            "3306",
-		User:            "gladiator",
-		Pass:            "gladius",
-		Schema:          "event_managment",
+		User:            "root",
+		Pass:            "root",
+		Schema:          "event_management",
 		MaxIdleConn:     1,
 		MaxOpenConn:     2,
 		MaxConnLifetime: 30,
@@ -161,11 +161,17 @@ func setDefaultConfig() {
 	}
 
 	config.Redis = &RedisConfig{
-		Host:            "127.0.0.1",
-		Port:            "6379",
-		Pass:            "",
-		Db:              2,
-		MandatoryPrefix: "event_managment_",
+		Host:               "127.0.0.1",
+		Port:               "6379",
+		Pass:               "secret_redis",
+		Db:                 2,
+		MandatoryPrefix:    "event_management_",
+		AccessUuidPrefix:   "access-uuid_",
+		RefreshUuidPrefix:  "refresh-uuid_",
+		UserPrefix:         "user_",
+		PermissionPrefix:   "permissions_",
+		UserCacheTTL:       3600,
+		PermissionCacheTTL: 86400,
 	}
 
 	config.Asynq = &AsynqConfig{
@@ -177,5 +183,15 @@ func setDefaultConfig() {
 		Retention:   168,
 		RetryCount:  25,
 		Delay:       120,
+	}
+	config.Logger = &LoggerConfig{
+		Level:    "debug",
+		FilePath: "logs/event_management.log",
+	}
+	config.Jwt = &JwtConfig{
+		AccessTokenSecret:  "secret_access_token",
+		RefreshTokenSecret: "secret_refresh_token",
+		AccessTokenExpiry:  3600,
+		RefreshTokenExpiry: 24 * time.Hour,
 	}
 }

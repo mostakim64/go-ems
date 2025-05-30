@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"errors"
+	"fmt"
 	"github.com/vivasoft-ltd/go-ems/middlewares"
 	"net/http"
 	"strconv"
@@ -42,6 +43,10 @@ func (ctrl *EventController) CreateEvent(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, msgutil.UserUnauthorized())
 	}
+	if req.IsPublic == nil {
+		f := false
+		req.IsPublic = &f
+	}
 	req.CreatedBy = user.ID
 
 	resp, err := ctrl.eventSvc.CreateEvent(&req)
@@ -53,7 +58,11 @@ func (ctrl *EventController) CreateEvent(c echo.Context) error {
 }
 
 func (ctrl *EventController) ListEvents(c echo.Context) error {
-	events, err := ctrl.eventSvc.ListEvents()
+	user, err := middlewares.CurrentUserFromCtx(c)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, msgutil.UserUnauthorized())
+	}
+	events, err := ctrl.eventSvc.ListEvents(user)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, msgutil.SomethingWentWrongMsg())
 	}
@@ -129,4 +138,38 @@ func (ctrl *EventController) DeleteEvent(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, msgutil.SomethingWentWrongMsg())
 	}
 	return c.JSON(http.StatusNoContent, resp)
+}
+func (ctrl *EventController) Rsvp(c echo.Context) error {
+	var req types.RsvpEventRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, msgutil.InvalidRequestMsg())
+	}
+	fmt.Printf("+ %+v", req)
+
+	if err := req.Validate(); err != nil {
+		return c.JSON(http.StatusBadRequest, &types.ValidationError{
+			Error: err,
+		})
+	}
+
+	user, err := middlewares.CurrentUserFromCtx(c)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, msgutil.UserUnauthorized())
+	}
+	req.UserID = user.ID
+	if err := ctrl.eventSvc.RsvpEvent(req); err != nil {
+		if errors.Is(err, errutil.ErrRecordNotFound) {
+			return c.JSON(http.StatusNotFound, msgutil.EventNotAllowed())
+		}
+		return c.JSON(http.StatusInternalServerError, msgutil.SomethingWentWrongMsg())
+	}
+	return c.JSON(http.StatusOK, msgutil.EventRSVPedSuccessfully())
+}
+
+func (ctrl *EventController) ListPublicEvents(c echo.Context) error {
+	events, err := ctrl.eventSvc.ListEvents(nil)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, msgutil.SomethingWentWrongMsg())
+	}
+	return c.JSON(http.StatusOK, events)
 }

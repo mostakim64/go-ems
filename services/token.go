@@ -66,6 +66,7 @@ func (*TokenServiceImpl) CreateToken(userID int) (*types.Token, error) {
 func (svc *TokenServiceImpl) ParseAccessToken(accessToken string) (*types.Token, error) {
 	parsedToken, err := methodutil.ParseJwtToken(accessToken, config.Jwt().AccessTokenSecret)
 	if err != nil {
+		log.Error(err)
 		return nil, errutil.ErrParseJwt
 	}
 

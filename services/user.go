@@ -171,6 +171,7 @@ func (svc *UserServiceImpl) readUserFromDB(id int) (*types.UserInfo, error) {
 		LastName:  user.LastName,
 		RoleID:    user.RoleID,
 		Role:      consts.RoleMap[user.RoleID],
+		Events:    user.Events,
 	}, nil
 }
 
@@ -243,4 +244,18 @@ func (svc *UserServiceImpl) ListUsers(req types.ListUserReq) (*types.PaginatedUs
 	}
 
 	return resp, nil
+}
+
+func (svc *UserServiceImpl) ListAttendees(user types.CurrentUser) ([]types.AttendeeResp, error) {
+	filter := &types.AttendeeFilter{}
+	if !user.HasPermission(consts.PermissionFetchAllUserAsAttendee) {
+		filter.RoleID = consts.RoleIdAttendee
+	}
+	users, err := svc.repo.ListAttendees(filter)
+
+	if err != nil {
+		logger.Error(fmt.Errorf("error occurred: [%v] while fetching attendees for user ID: %d", err, user.ID))
+		return nil, err
+	}
+	return users, nil
 }

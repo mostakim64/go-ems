@@ -56,7 +56,11 @@ func (m *AuthMiddleware) Authenticate(permission string) echo.MiddlewareFunc {
 			if permission != "" && !m.isPermissionAllowed(permission, permissions) {
 				return c.JSON(http.StatusForbidden, msgutil.PermissionError())
 			}
-
+			permissionStr := make([]string, len(permissions))
+			for i, permission := range permissions {
+				permissionStr[i] = permission.Permission
+			}
+			currentUser.Permissions = permissionStr
 			// Set user in context
 			c.Set(ContextKeyCurrentUser, currentUser)
 

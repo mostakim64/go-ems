@@ -4,16 +4,18 @@ import (
 	v "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
 	"github.com/vivasoft-ltd/go-ems/consts"
+	"github.com/vivasoft-ltd/go-ems/models"
 )
 
 type (
 	CurrentUser struct {
-		ID          int    `json:"id"`
-		Email       string `json:"email"`
-		RoleID      int    `json:"role_id"`
-		Role        string `json:"role"`
-		AccessUuid  string `json:"access_uuid"`
-		RefreshUuid string `json:"refresh_uuid"`
+		ID          int      `json:"id"`
+		Email       string   `json:"email"`
+		RoleID      int      `json:"role_id"`
+		Role        string   `json:"role"`
+		AccessUuid  string   `json:"access_uuid"`
+		RefreshUuid string   `json:"refresh_uuid"`
+		Permissions []string `json:"permissions"`
 	}
 
 	CreateUserReq struct {
@@ -36,12 +38,13 @@ type (
 	}
 
 	UserInfo struct {
-		ID        int    `json:"id"`
-		Email     string `json:"email"`
-		FirstName string `json:"first_name"`
-		LastName  string `json:"last_name"`
-		RoleID    int    `json:"role_id"`
-		Role      string `json:"role,omitempty" gorm:"-"`
+		ID        int            `json:"id"`
+		Email     string         `json:"email"`
+		FirstName string         `json:"first_name"`
+		LastName  string         `json:"last_name"`
+		RoleID    int            `json:"role_id"`
+		Role      string         `json:"role,omitempty" gorm:"-"`
+		Events    []models.Event `json:"events,omitempty" gorm:"-"`
 	}
 
 	ListUserReq struct {
@@ -54,6 +57,15 @@ type (
 		Page  int         `json:"page"`
 		Limit int         `json:"limit"`
 		Users []*UserInfo `json:"users"`
+	}
+	AttendeeFilter struct {
+		RoleID int
+	}
+	AttendeeResp struct {
+		ID        int    `json:"id"`
+		Email     string `json:"email"`
+		FirstName string `json:"first_name"`
+		LastName  string `json:"last_name"`
 	}
 )
 
@@ -79,4 +91,12 @@ func (rq *UserReq) Validate() error {
 	return v.ValidateStruct(rq,
 		v.Field(&rq.ID, v.Required, v.Min(1)),
 	)
+}
+func (u CurrentUser) HasPermission(permission string) bool {
+	for _, p := range u.Permissions {
+		if p == permission {
+			return true
+		}
+	}
+	return false
 }
