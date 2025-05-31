@@ -35,6 +35,16 @@ type (
 		Message string        `json:"message"`
 		Event   *models.Event `json:"event"`
 	}
+	ListEventRequest struct {
+		Page  int `query:"page"`
+		Limit int `query:"limit"`
+	}
+	PaginatedEventResponse struct {
+		Total  int             `json:"total"`
+		Page   int             `json:"page"`
+		Limit  int             `json:"limit"`
+		Events []*models.Event `json:"events"`
+	}
 )
 
 func (cereq *CreateEventRequest) Validate() error {

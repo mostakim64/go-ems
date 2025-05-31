@@ -32,15 +32,22 @@ func (svc *EventServiceImpl) CreateEvent(eventReq *types.CreateEventRequest) (*t
 	}, nil
 }
 
-func (svc *EventServiceImpl) ListEvents() ([]*models.Event, error) {
-	events, err := svc.eventRepo.ListEvents()
+func (svc *EventServiceImpl) ListEvents(req types.ListEventRequest) (*types.PaginatedEventResponse, error) {
+	offset := (req.Page - 1) * req.Limit
+	events, count, err := svc.eventRepo.ListEvents(req.Limit, offset)
 	if errors.Is(err, errutil.ErrRecordNotFound) {
-		return []*models.Event{}, nil
+		return nil, nil
 	}
 	if err != nil {
 		return nil, err
 	}
-	return events, nil
+	response := &types.PaginatedEventResponse{
+		Page:   req.Page,
+		Limit:  req.Limit,
+		Total:  count,
+		Events: events,
+	}
+	return response, nil
 }
 
 func (svc *EventServiceImpl) ReadEventByID(id int) (*models.Event, error) {

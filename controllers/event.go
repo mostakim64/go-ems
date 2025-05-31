@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"errors"
+	"github.com/vivasoft-ltd/go-ems/consts"
 	"github.com/vivasoft-ltd/go-ems/middlewares"
 	"net/http"
 	"strconv"
@@ -53,7 +54,17 @@ func (ctrl *EventController) CreateEvent(c echo.Context) error {
 }
 
 func (ctrl *EventController) ListEvents(c echo.Context) error {
-	events, err := ctrl.eventSvc.ListEvents()
+	req := types.ListEventRequest{}
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, msgutil.InvalidRequestMsg())
+	}
+	if req.Limit <= 0 {
+		req.Limit = consts.DefaultPageSize
+	}
+	if req.Page <= 0 {
+		req.Page = consts.DefaultPage
+	}
+	events, err := ctrl.eventSvc.ListEvents(req)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, msgutil.SomethingWentWrongMsg())
 	}

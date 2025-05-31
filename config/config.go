@@ -165,7 +165,7 @@ func setDefaultConfig() {
 		Port:            "6379",
 		Pass:            "",
 		Db:              2,
-		MandatoryPrefix: "event_managment_",
+		MandatoryPrefix: "event_management_",
 	}
 
 	config.Asynq = &AsynqConfig{

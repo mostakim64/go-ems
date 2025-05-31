@@ -4,14 +4,14 @@ import "time"
 
 type (
 	User struct {
-		ID        int
-		Email     string
-		Password  string
-		FirstName string
-		LastName  string
-		RoleID    int
-		CreatedAt time.Time
-		UpdatedAt time.Time
+		ID        int       `json:"id"`
+		Email     string    `json:"email"`
+		Password  string    `json:"-"`
+		FirstName string    `json:"first_name"`
+		LastName  string    `json:"last_name"`
+		RoleID    int       `json:"-"`
+		CreatedAt time.Time `json:"-"`
+		UpdatedAt time.Time `json:"-"`
 	}
 
 	RolePermission struct {
