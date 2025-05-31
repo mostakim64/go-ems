@@ -8,12 +8,13 @@ import (
 
 type (
 	CurrentUser struct {
-		ID          int    `json:"id"`
-		Email       string `json:"email"`
-		RoleID      int    `json:"role_id"`
-		Role        string `json:"role"`
-		AccessUuid  string `json:"access_uuid"`
-		RefreshUuid string `json:"refresh_uuid"`
+		ID          int      `json:"id"`
+		Email       string   `json:"email"`
+		RoleID      int      `json:"role_id"`
+		Role        string   `json:"role"`
+		AccessUuid  string   `json:"access_uuid"`
+		RefreshUuid string   `json:"refresh_uuid"`
+		Permissions []string `json:"-"`
 	}
 
 	CreateUserReq struct {
@@ -79,4 +80,12 @@ func (rq *UserReq) Validate() error {
 	return v.ValidateStruct(rq,
 		v.Field(&rq.ID, v.Required, v.Min(1)),
 	)
+}
+func (u CurrentUser) HasPermission(permission string) bool {
+	for _, p := range u.Permissions {
+		if p == permission {
+			return true
+		}
+	}
+	return false
 }
