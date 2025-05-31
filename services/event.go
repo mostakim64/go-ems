@@ -47,7 +47,7 @@ func (svc *EventServiceImpl) ListEvents(req types.ListEventRequest, user *types.
 	filter := svc.getEventListFilter(user)
 	events, count, err := svc.eventRepo.ListEvents(filter, req.Limit, offset)
 	if errors.Is(err, errutil.ErrRecordNotFound) {
-		return nil, nil
+		return &types.PaginatedEventResponse{}, nil
 	}
 	if err != nil {
 		return nil, err
