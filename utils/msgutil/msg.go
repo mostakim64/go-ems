@@ -93,3 +93,6 @@ func UserUpdatedSuccessfully() Data {
 func UserDeletedSuccessfully() Data {
 	return NewMessage().Set("message", "User deleted successfully").Done()
 }
+func EventCapacityExceeded() Data {
+	return NewMessage().Set("message", "Event capacity exceeded").Done()
+}

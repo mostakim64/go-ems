@@ -12,8 +12,9 @@ type (
 		ReadEventByID(id int) (*models.Event, error)
 		UpdateEvent(event *models.Event) (*models.Event, error)
 		DeleteEvent(id int) error
-		ReadEventInvitation(event int, userID int) (*models.EventAttendee, error)
+		ReadEventInvitation(eventID int, userID int) (*models.EventAttendee, error)
 		UpsertEventInvitation(event *models.EventAttendee) error
+		GetEventAttendeesCount(eventID int) (int, error)
 	}
 
 	EventService interface {

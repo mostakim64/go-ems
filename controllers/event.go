@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"errors"
-	"fmt"
 	"github.com/vivasoft-ltd/go-ems/middlewares"
 	"net/http"
 	"strconv"
@@ -18,11 +17,13 @@ import (
 
 type EventController struct {
 	eventSvc domain.EventService
+	mailSvc  domain.MailService
 }
 
-func NewEventController(eventSvc domain.EventService) *EventController {
+func NewEventController(eventSvc domain.EventService, mailSvc domain.MailService) *EventController {
 	return &EventController{
 		eventSvc: eventSvc,
+		mailSvc:  mailSvc,
 	}
 }
 
@@ -43,18 +44,24 @@ func (ctrl *EventController) CreateEvent(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, msgutil.UserUnauthorized())
 	}
-	if req.IsPublic == nil {
-		f := false
-		req.IsPublic = &f
-	}
+
 	req.CreatedBy = user.ID
 
 	resp, err := ctrl.eventSvc.CreateEvent(&req)
+
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, msgutil.SomethingWentWrongMsg())
 	}
 
-	return c.JSON(http.StatusOK, resp)
+	go func() {
+		if !req.IsPublic {
+			if err := ctrl.mailSvc.SendInvitationEmail(req.Attendees); err != nil {
+				logger.Error("failed to send email: %v", err)
+			}
+		}
+	}()
+
+	return c.JSON(http.StatusCreated, resp)
 }
 
 func (ctrl *EventController) ListEvents(c echo.Context) error {
@@ -144,7 +151,6 @@ func (ctrl *EventController) Rsvp(c echo.Context) error {
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, msgutil.InvalidRequestMsg())
 	}
-	fmt.Printf("+ %+v", req)
 
 	if err := req.Validate(); err != nil {
 		return c.JSON(http.StatusBadRequest, &types.ValidationError{
@@ -161,8 +167,12 @@ func (ctrl *EventController) Rsvp(c echo.Context) error {
 		if errors.Is(err, errutil.ErrRecordNotFound) {
 			return c.JSON(http.StatusNotFound, msgutil.EventNotAllowed())
 		}
+		if errors.Is(err, errutil.ErrEventCapacityExceeded) {
+			return c.JSON(http.StatusBadRequest, msgutil.EventCapacityExceeded())
+		}
 		return c.JSON(http.StatusInternalServerError, msgutil.SomethingWentWrongMsg())
 	}
+
 	return c.JSON(http.StatusOK, msgutil.EventRSVPedSuccessfully())
 }
 

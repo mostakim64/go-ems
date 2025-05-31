@@ -4,15 +4,15 @@ import "time"
 
 type (
 	User struct {
-		ID        int
-		Email     string
-		Password  string `json:"-"`
-		FirstName string
-		LastName  string
-		RoleID    int
-		CreatedAt time.Time
-		UpdatedAt time.Time
-		Events    []Event `gorm:"many2many:event_attendees;"`
+		ID        int       `json:"id"`
+		Email     string    `json:"email"`
+		Password  string    `json:"-"`
+		FirstName string    `json:"first_name"`
+		LastName  string    `json:"last_name"`
+		RoleID    int       `json:"-"`
+		CreatedAt time.Time `json:"-"`
+		UpdatedAt time.Time `json:"-"`
+		Events    []Event   `json:"events,omitempty" gorm:"many2many:event_attendees;"`
 	}
 
 	RolePermission struct {

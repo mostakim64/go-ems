@@ -32,7 +32,7 @@ func (repo *Repository) ListEvents(filter *types.EventFilter) ([]*models.Event, 
 			query = query.Where("created_by = ?", filter.CreatedBy)
 		}
 		if filter.Attendee != nil {
-			query = query.Where("is_public = ? OR id IN (SELECT event_id FROM event_attendees WHERE user_id = ?)", true, filter.Attendee)
+			query = query.Where("(is_public = ? and end_time < curdate()) OR id IN (SELECT event_id FROM event_attendees WHERE user_id = ?)", true, filter.Attendee)
 		}
 	}
 	var events []*models.Event
@@ -100,11 +100,19 @@ func (repo *Repository) ReadEventInvitation(event int, userID int) (*models.Even
 func (repo *Repository) UpsertEventInvitation(invitation *models.EventAttendee) error {
 	qry := repo.client.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "event_id"}, {Name: "user_id"}},
-		DoUpdates: clause.Assignments(map[string]interface{}{"rsvp": invitation.RSVP}),
+		DoUpdates: clause.Assignments(map[string]interface{}{"status_id": invitation.StatusID}),
 	}).Create(invitation)
+
 	if qry.Error != nil {
 		logger.Error(fmt.Errorf("error upserting event invitation: %w", qry.Error))
 		return qry.Error
 	}
 	return nil
+}
+func (repo *Repository) GetEventAttendeesCount(eventID int) (int, error) {
+	var count int64
+	if err := repo.client.Model(&models.EventAttendee{}).Where("event_id = ?", eventID).Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return int(count), nil
 }

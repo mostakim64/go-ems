@@ -12,7 +12,7 @@ func (repo *Repository) CreateUser(user *models.User) (*models.User, error) {
 
 func (repo *Repository) ReadUserById(id int) (*models.User, error) {
 	var user models.User
-	if err := repo.client.Preload("Events").Model(&models.User{}).Where("id = ?", id).First(&user).Error; err != nil {
+	if err := repo.client.Model(&models.User{}).Where("id = ?", id).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil

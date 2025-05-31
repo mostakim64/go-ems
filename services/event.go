@@ -24,7 +24,7 @@ func NewEventServiceImpl(eventRepo domain.EventRepository, userRepo domain.UserR
 
 func (svc *EventServiceImpl) CreateEvent(eventReq *types.CreateEventRequest) (*types.CreateEventResponse, error) {
 	event := eventReq.ToEvent()
-	if len(eventReq.Attendees) > 0 {
+	if !eventReq.IsPublic && len(eventReq.Attendees) > 0 {
 		users, err := svc.userRepo.ReadUsers(eventReq.Attendees)
 		if err != nil {
 			return nil, err
@@ -118,23 +118,30 @@ func (svc *EventServiceImpl) RsvpEvent(request types.RsvpEventRequest) error {
 	if err != nil {
 		return err
 	}
-	if event.IsPublic != nil && !*event.IsPublic {
+	if !event.IsPublic {
 		invitation, err := svc.eventRepo.ReadEventInvitation(event.ID, request.UserID)
 		if invitation == nil || err != nil {
 			return errutil.ErrRecordNotFound
 		}
-		invitation.RSVP = request.Rsvp
+		invitation.StatusID = request.StatusID
 		err = svc.eventRepo.UpsertEventInvitation(invitation)
 		if err != nil {
 			return err
 		}
 		return nil
 	}
+	count, err := svc.eventRepo.GetEventAttendeesCount(request.EventID)
+	if err != nil {
+		return err
+	}
+	if *event.Limit > 0 && count >= *event.Limit {
+		return errutil.ErrEventCapacityExceeded
+	}
 
 	newInvitation := &models.EventAttendee{
-		EventID: request.EventID,
-		UserID:  request.UserID,
-		RSVP:    request.Rsvp,
+		EventID:  request.EventID,
+		UserID:   request.UserID,
+		StatusID: request.StatusID,
 	}
 	err = svc.eventRepo.UpsertEventInvitation(newInvitation)
 	if err != nil {

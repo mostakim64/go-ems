@@ -60,6 +60,7 @@ var (
 	ErrInvalidPasswordFormat            = errors.New("minimum 8 characters with at least 1 uppercase letter(A-Z), 1 lowercase letter(a-z), 1 number(0-9) and 1 special character(.!@#~$%^&*()+|_<>)")
 	ErrInvalidRegion                    = errors.New("invalid region")
 	ErrInvalidLineLoginCountry          = errors.New("invalid login country")
+	ErrEventCapacityExceeded            = errors.New("event capacity exceeded")
 )
 
 func Exists(err error, errs []error) bool {
