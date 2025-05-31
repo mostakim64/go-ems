@@ -2,7 +2,6 @@ package services
 
 import (
 	"errors"
-	"fmt"
 	"github.com/vivasoft-ltd/go-ems/consts"
 	"github.com/vivasoft-ltd/go-ems/domain"
 	"github.com/vivasoft-ltd/go-ems/models"
@@ -43,19 +42,25 @@ func (svc *EventServiceImpl) CreateEvent(eventReq *types.CreateEventRequest) (*t
 	}, nil
 }
 
-func (svc *EventServiceImpl) ListEvents(user *types.CurrentUser) ([]*models.Event, error) {
+func (svc *EventServiceImpl) ListEvents(req types.ListEventRequest, user *types.CurrentUser) (*types.PaginatedEventResponse, error) {
+	offset := (req.Page - 1) * req.Limit
 	filter := svc.getEventListFilter(user)
-	events, err := svc.eventRepo.ListEvents(filter)
+	events, count, err := svc.eventRepo.ListEvents(filter, req.Limit, offset)
 	if errors.Is(err, errutil.ErrRecordNotFound) {
-		return []*models.Event{}, nil
+		return nil, nil
 	}
 	if err != nil {
 		return nil, err
 	}
-	return events, nil
+	response := &types.PaginatedEventResponse{
+		Page:   req.Page,
+		Limit:  req.Limit,
+		Total:  count,
+		Events: events,
+	}
+	return response, nil
 }
 func (svc *EventServiceImpl) getEventListFilter(user *types.CurrentUser) *types.EventFilter {
-	fmt.Printf("user: + %+v", user)
 	filter := &types.EventFilter{}
 	if user == nil {
 		t := true

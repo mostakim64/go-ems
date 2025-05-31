@@ -151,9 +151,9 @@ func setDefaultConfig() {
 	config.DB = &DbConfig{
 		Host:            "127.0.0.1",
 		Port:            "3306",
-		User:            "root",
-		Pass:            "root",
-		Schema:          "event_management",
+		User:            "gladiator",
+		Pass:            "gladius",
+		Schema:          "event_managment",
 		MaxIdleConn:     1,
 		MaxOpenConn:     2,
 		MaxConnLifetime: 30,

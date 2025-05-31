@@ -8,7 +8,7 @@ import (
 type (
 	EventRepository interface {
 		CreateEvent(event *models.Event) (*models.Event, error)
-		ListEvents(filter *types.EventFilter) ([]*models.Event, error)
+		ListEvents(filter *types.EventFilter, limit, offset int) ([]*models.Event, int, error)
 		ReadEventByID(id int) (*models.Event, error)
 		UpdateEvent(event *models.Event) (*models.Event, error)
 		DeleteEvent(id int) error
@@ -19,7 +19,7 @@ type (
 
 	EventService interface {
 		CreateEvent(eventReq *types.CreateEventRequest) (*types.CreateEventResponse, error)
-		ListEvents(user *types.CurrentUser) ([]*models.Event, error)
+		ListEvents(req types.ListEventRequest, user *types.CurrentUser) (*types.PaginatedEventResponse, error)
 		ReadEventByID(id int) (*models.Event, error)
 		DeleteEvent(id int) (*types.DeleteEventResponse, error)
 		UpdateEvent(eventReq *types.UpdateEventRequest) (*types.UpdateEventResponse, error)

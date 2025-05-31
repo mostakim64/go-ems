@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"errors"
+	"github.com/vivasoft-ltd/go-ems/consts"
 	"github.com/vivasoft-ltd/go-ems/middlewares"
 	"net/http"
 	"strconv"
@@ -69,7 +70,17 @@ func (ctrl *EventController) ListEvents(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, msgutil.UserUnauthorized())
 	}
-	events, err := ctrl.eventSvc.ListEvents(user)
+	req := types.ListEventRequest{}
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, msgutil.InvalidRequestMsg())
+	}
+	if req.Limit <= 0 {
+		req.Limit = consts.DefaultPageSize
+	}
+	if req.Page <= 0 {
+		req.Page = consts.DefaultPage
+	}
+	events, err := ctrl.eventSvc.ListEvents(req, user)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, msgutil.SomethingWentWrongMsg())
 	}
@@ -177,7 +188,17 @@ func (ctrl *EventController) Rsvp(c echo.Context) error {
 }
 
 func (ctrl *EventController) ListPublicEvents(c echo.Context) error {
-	events, err := ctrl.eventSvc.ListEvents(nil)
+	req := types.ListEventRequest{}
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, msgutil.InvalidRequestMsg())
+	}
+	if req.Limit <= 0 {
+		req.Limit = consts.DefaultPageSize
+	}
+	if req.Page <= 0 {
+		req.Page = consts.DefaultPage
+	}
+	events, err := ctrl.eventSvc.ListEvents(req, nil)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, msgutil.SomethingWentWrongMsg())
 	}

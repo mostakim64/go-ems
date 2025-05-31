@@ -21,7 +21,7 @@ func (repo *Repository) CreateEvent(event *models.Event) (*models.Event, error) 
 	return event, nil
 }
 
-func (repo *Repository) ListEvents(filter *types.EventFilter) ([]*models.Event, error) {
+func (repo *Repository) ListEvents(filter *types.EventFilter, Limit, Offset int) ([]*models.Event, int, error) {
 	query := repo.client.Model(&models.Event{})
 	fmt.Printf("+ %+v", filter)
 	if filter != nil {
@@ -36,17 +36,21 @@ func (repo *Repository) ListEvents(filter *types.EventFilter) ([]*models.Event, 
 		}
 	}
 	var events []*models.Event
-	result := query.Find(&events)
+	var count int64
+	if err := repo.client.Model(&models.Event{}).Count(&count).Error; err != nil {
+		return nil, 0, err
+	}
+	result := query.Offset(Offset).Limit(Limit).Find(&events)
 	if result.RowsAffected == 0 {
 		logger.Error("no events found")
-		return nil, errutil.ErrRecordNotFound
+		return nil, 0, errutil.ErrRecordNotFound
 	}
 	if result.Error != nil {
 		logger.Error(fmt.Errorf("error listing events: %w", result.Error))
-		return nil, result.Error
+		return nil, 0, result.Error
 	}
 
-	return events, nil
+	return events, int(count), nil
 }
 
 func (repo *Repository) ReadEventByID(id int) (*models.Event, error) {

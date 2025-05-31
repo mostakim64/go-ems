@@ -48,6 +48,16 @@ type (
 		Attendee  *int  `query:"attendee"`
 		IsPublic  *bool `query:"is_public"`
 	}
+	ListEventRequest struct {
+		Page  int `query:"page"`
+		Limit int `query:"limit"`
+	}
+	PaginatedEventResponse struct {
+		Total  int             `json:"total"`
+		Page   int             `json:"page"`
+		Limit  int             `json:"limit"`
+		Events []*models.Event `json:"events"`
+	}
 )
 
 func (r *RsvpEventRequest) Validate() error {
