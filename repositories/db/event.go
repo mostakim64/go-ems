@@ -22,22 +22,13 @@ func (repo *Repository) CreateEvent(event *models.Event) (*models.Event, error) 
 }
 
 func (repo *Repository) ListEvents(filter *types.EventFilter, Limit, Offset int) ([]*models.Event, int, error) {
-	query := repo.client.Model(&models.Event{})
-	fmt.Printf("+ %+v", filter)
-	if filter != nil {
-		if filter.IsPublic != nil {
-			query = query.Where("is_public = ?", filter.IsPublic)
-		}
-		if filter.CreatedBy != nil {
-			query = query.Where("created_by = ?", filter.CreatedBy)
-		}
-		if filter.Attendee != nil {
-			query = query.Where("(is_public = ? and end_time < curdate()) OR id IN (SELECT event_id FROM event_attendees WHERE user_id = ?)", true, filter.Attendee)
-		}
-	}
 	var events []*models.Event
 	var count int64
-	if err := repo.client.Model(&models.Event{}).Count(&count).Error; err != nil {
+
+	query := repo.client.Model(&models.Event{})
+	repo.applyFilters(query, filter)
+
+	if err := query.Count(&count).Error; err != nil {
 		return nil, 0, err
 	}
 	result := query.Offset(Offset).Limit(Limit).Find(&events)
@@ -51,6 +42,20 @@ func (repo *Repository) ListEvents(filter *types.EventFilter, Limit, Offset int)
 	}
 
 	return events, int(count), nil
+}
+func (repo *Repository) applyFilters(query *gorm.DB, filter *types.EventFilter) {
+	if filter == nil {
+		return
+	}
+	if filter.IsPublic != nil {
+		query = query.Where("is_public = ? and end_time > curdate()", filter.IsPublic)
+	}
+	if filter.CreatedBy != nil {
+		query = query.Where("created_by = ?", filter.CreatedBy)
+	}
+	if filter.Attendee != nil {
+		query = query.Where("(is_public = ? and end_time > curdate()) OR id IN (SELECT event_id FROM event_attendees WHERE user_id = ?)", true, filter.Attendee)
+	}
 }
 
 func (repo *Repository) ReadEventByID(id int) (*models.Event, error) {
