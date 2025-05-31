@@ -15,7 +15,7 @@ type (
 		Role        string   `json:"role"`
 		AccessUuid  string   `json:"access_uuid"`
 		RefreshUuid string   `json:"refresh_uuid"`
-		Permissions []string `json:"permissions"`
+		Permissions []string `json:"-"`
 	}
 
 	CreateUserReq struct {
