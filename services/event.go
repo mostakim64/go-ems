@@ -36,7 +36,7 @@ func (svc *EventServiceImpl) ListEvents(req types.ListEventRequest) (*types.Pagi
 	offset := (req.Page - 1) * req.Limit
 	events, count, err := svc.eventRepo.ListEvents(req.Limit, offset)
 	if errors.Is(err, errutil.ErrRecordNotFound) {
-		return nil, nil
+		return &types.PaginatedEventResponse{}, nil
 	}
 	if err != nil {
 		return nil, err
