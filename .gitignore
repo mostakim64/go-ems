@@ -7,3 +7,4 @@ app.exe
 go-ems
 go-ems.exe
 *.log
+__debug_*

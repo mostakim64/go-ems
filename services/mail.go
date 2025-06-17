@@ -1,28 +1,102 @@
 package services
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"net/http"
+
+	"github.com/vivasoft-ltd/go-ems/config"
 	"github.com/vivasoft-ltd/go-ems/domain"
+	"github.com/vivasoft-ltd/go-ems/models"
+	"github.com/vivasoft-ltd/go-ems/types"
+	"github.com/vivasoft-ltd/go-ems/worker"
 	"github.com/vivasoft-ltd/golang-course-utils/logger"
 )
 
 type Mail struct {
-	userRepo domain.UserRepository
+	userRepo    domain.UserRepository
+	emailClient *http.Client
+	workerPool  *worker.Pool
 }
 
-func NewMailService(userRepo domain.UserRepository) *Mail {
+func NewMailService(userRepo domain.UserRepository, emailClient *http.Client, workerPool *worker.Pool) *Mail {
 	return &Mail{
-		userRepo: userRepo,
+		userRepo:    userRepo,
+		emailClient: emailClient,
+		workerPool:  workerPool,
 	}
 }
-func (m *Mail) SendInvitationEmail(userIds []int) error {
+
+func (m *Mail) SendEmail(reqData types.EmailPayload) error {
+	reqURL := config.Email().Url
+	reqByte, _ := json.Marshal(reqData)
+
+	req, err := http.NewRequest(http.MethodPost, reqURL, bytes.NewBuffer(reqByte))
+	if err != nil {
+		logger.Error(err, " while creating email request to: ", reqData.MailTo)
+		return err
+	}
+
+	res, err := m.emailClient.Do(req)
+	if err != nil {
+		logger.Error(err, " on email send to: ", reqData.MailTo)
+		return err
+	}
+
+	logger.Info(fmt.Sprintf("email service status code [%v] after email send to: %v ", res.StatusCode, reqData.MailTo))
+	return nil
+}
+
+// func (m *Mail) SendInvitationEmail(userIds []int, event *models.Event) error {
+// 	users, err := m.userRepo.ReadUsers(userIds)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	for _, user := range users {
+// 		emailPayload := types.EmailPayload{
+// 			MailTo:  user.Email,
+// 			Subject: "Invitation to Event: " + event.Title,
+// 			Body: map[string]interface{}{
+// 				"event":     event,
+// 				"time":      event.StartTime.Format("2006-01-02 15:04:05"),
+// 				"rsvp_link": fmt.Sprintf("http://127.0.0.1:8080/v1/events/%d/rsvp", event.ID),
+// 			},
+// 		}
+
+// 		m.SendEmail(emailPayload)
+// 	}
+
+// 	return nil
+// }
+
+func (m *Mail) SendInvitationEmail(userIds []int, event *models.Event) error {
 	users, err := m.userRepo.ReadUsers(userIds)
 	if err != nil {
 		return err
 	}
+
 	for _, user := range users {
-		logger.Info(fmt.Sprintf("Send Invitation Mail to %s", user.Email))
+		emailPayload := types.EmailPayload{
+			MailTo:  user.Email,
+			Subject: "Invitation to Event: " + event.Title,
+			Body: map[string]interface{}{
+				"event":     event,
+				"rsvp_link": fmt.Sprintf("http://127.0.0.1:8080/v1/events/%d/rsvp", event.ID),
+			},
+		}
+
+		// Add the email sending task to the worker pool
+		task := worker.NewTask(func() error {
+			return m.SendEmail(emailPayload)
+		}, func(err error) {
+			logger.Error("Failed to send email: ", err, " to user: ", user.Email)
+		}, 3)
+
+		m.workerPool.AddTask(task)
 	}
+
+	// wp.StopAfterTaskCompleted(len(users))
 
 	return nil
 }

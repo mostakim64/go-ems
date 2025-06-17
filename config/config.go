@@ -11,8 +11,9 @@ import (
 )
 
 type AppConfig struct {
-	Name string
-	Port string
+	Name            string
+	Port            string
+	NumberOfWorkers int
 }
 
 type DbConfig struct {
@@ -64,6 +65,11 @@ type LoggerConfig struct {
 	FilePath string
 }
 
+type EmailConfig struct {
+	Url     string
+	Timeout time.Duration
+}
+
 type Config struct {
 	App    *AppConfig
 	DB     *DbConfig
@@ -71,6 +77,7 @@ type Config struct {
 	Asynq  *AsynqConfig
 	Logger *LoggerConfig
 	Jwt    *JwtConfig
+	Email  *EmailConfig
 }
 
 var config Config
@@ -101,6 +108,10 @@ func Logger() *LoggerConfig {
 
 func Jwt() *JwtConfig {
 	return config.Jwt
+}
+
+func Email() *EmailConfig {
+	return config.Email
 }
 
 func LoadConfig() {
@@ -144,8 +155,9 @@ func LoadConfig() {
 
 func setDefaultConfig() {
 	config.App = &AppConfig{
-		Name: "app",
-		Port: "8080",
+		Name:            "app",
+		Port:            "8080",
+		NumberOfWorkers: 5,
 	}
 
 	config.DB = &DbConfig{

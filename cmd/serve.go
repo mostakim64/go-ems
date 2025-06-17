@@ -21,6 +21,10 @@ func serve(cmd *cobra.Command, args []string) {
 	// clients
 	dbClient := conn.Db()
 	redisClient := conn.Redis()
+	emailClient := conn.EmailClient()
+
+	// worker
+	workerPool := conn.WorkerPool()
 
 	// repositories
 	dbRepo := db_repo.NewRepository(dbClient)
@@ -31,7 +35,7 @@ func serve(cmd *cobra.Command, args []string) {
 	userSvc := services.NewUserServiceImpl(redisSvc, dbRepo)
 	tokenSvc := services.NewTokenServiceImpl(redisSvc)
 	authSvc := services.NewAuthServiceImpl(userSvc, tokenSvc)
-	mailSvc := services.NewMailService(dbRepo)
+	mailSvc := services.NewMailService(dbRepo, emailClient, workerPool)
 
 	// controllers
 	eventCtrl := controllers.NewEventController(eventSvc, mailSvc)
@@ -48,5 +52,7 @@ func serve(cmd *cobra.Command, args []string) {
 
 	// Spooling
 	Routes.Init()
-	Server.Start()
+
+	// Stopping running workers
+	Server.Start(workerPool)
 }

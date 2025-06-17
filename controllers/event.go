@@ -2,10 +2,11 @@ package controllers
 
 import (
 	"errors"
-	"github.com/vivasoft-ltd/go-ems/consts"
-	"github.com/vivasoft-ltd/go-ems/middlewares"
 	"net/http"
 	"strconv"
+
+	"github.com/vivasoft-ltd/go-ems/consts"
+	"github.com/vivasoft-ltd/go-ems/middlewares"
 
 	v "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/labstack/echo/v4"
@@ -54,13 +55,13 @@ func (ctrl *EventController) CreateEvent(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, msgutil.SomethingWentWrongMsg())
 	}
 
-	go func() {
-		if !req.IsPublic {
-			if err := ctrl.mailSvc.SendInvitationEmail(req.Attendees); err != nil {
-				logger.Error("failed to send email: %v", err)
-			}
+	// go func() {
+	if !req.IsPublic {
+		if err := ctrl.mailSvc.SendInvitationEmail(req.Attendees, resp.Event); err != nil {
+			logger.Error("failed to send email: %v", err)
 		}
-	}()
+	}
+	// }()
 
 	return c.JSON(http.StatusCreated, resp)
 }
