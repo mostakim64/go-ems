@@ -61,6 +61,7 @@ var (
 	ErrInvalidRegion                    = errors.New("invalid region")
 	ErrInvalidLineLoginCountry          = errors.New("invalid login country")
 	ErrEventCapacityExceeded            = errors.New("event capacity exceeded")
+	ErrEventReminderEmailNotEnqueued    = errors.New("event reminder email notification not enqueued")
 )
 
 func Exists(err error, errs []error) bool {

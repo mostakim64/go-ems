@@ -15,6 +15,7 @@ type (
 		ReadEventInvitation(eventID int, userID int) (*models.EventAttendee, error)
 		UpsertEventInvitation(event *models.EventAttendee) error
 		GetEventAttendeesCount(eventID int) (int, error)
+		GetAcceptedEventAttendees(eventID int) ([]models.EventAttendee, error)
 	}
 
 	EventService interface {

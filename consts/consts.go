@@ -1,5 +1,7 @@
 package consts
 
+import "time"
+
 const (
 	RoleIdAdmin    = iota + 1
 	RoleIdManager  = 2
@@ -28,6 +30,12 @@ const (
 	PermissionFetchAllEvent     = "event.fetchAllEvent"
 	PermissionFetchOwnEvent     = "event.fetchOwnEvent"
 	PermissionFetchInvitedEvent = "event.fetchInvitedEvent"
+
+	StatusInvited  = 1
+	StatusAccepted = 2
+	StatusRejected = 3
+
+	EventReminderInterval = time.Duration(10 * time.Minute)
 )
 
 var RoleMap = map[int]string{

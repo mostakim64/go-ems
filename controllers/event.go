@@ -63,6 +63,13 @@ func (ctrl *EventController) CreateEvent(c echo.Context) error {
 	}
 	// }()
 
+	// Enqueue event reminder email notification before the event starts
+	go func() {
+		if err := ctrl.mailSvc.EnqueueEventReminderEmailNotification(resp.Event); err != nil {
+			logger.Error("failed to enqueue event reminder email notification: %v", err)
+		}
+	}()
+
 	return c.JSON(http.StatusCreated, resp)
 }
 

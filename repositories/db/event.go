@@ -3,6 +3,8 @@ package db
 import (
 	"errors"
 	"fmt"
+
+	"github.com/vivasoft-ltd/go-ems/consts"
 	"github.com/vivasoft-ltd/go-ems/models"
 	"github.com/vivasoft-ltd/go-ems/types"
 	"github.com/vivasoft-ltd/go-ems/utils/errutil"
@@ -124,4 +126,15 @@ func (repo *Repository) GetEventAttendeesCount(eventID int) (int, error) {
 		return 0, err
 	}
 	return int(count), nil
+}
+
+func (repo *Repository) GetAcceptedEventAttendees(eventID int) ([]models.EventAttendee, error) {
+	var eventAttendees []models.EventAttendee
+	if err := repo.client.Model(&models.EventAttendee{}).Where("event_id = ? and status_id = ?", eventID, consts.StatusAccepted).Preload("User").Find(&eventAttendees).Error; err != nil {
+		return nil, err
+	}
+	if len(eventAttendees) == 0 {
+		return nil, errutil.ErrUserNotFound
+	}
+	return eventAttendees, nil
 }
