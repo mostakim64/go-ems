@@ -55,6 +55,17 @@ func (p *Pool) Stop() {
 	})
 }
 
+func (p *Pool) StopWithContext(ctx context.Context) {
+	p.stop.Do(func() {
+		close(p.quit)  // First signal to stop accepting new tasks
+		close(p.tasks) // Then close the task channel to stop running tasks and return from infinite loop
+
+		// Wait for context timeout
+		<-ctx.Done()
+		fmt.Println("Worker pool stopped with context timeout")
+	})
+}
+
 func (p *Pool) AddTask(t Executor) {
 	select {
 	case p.tasks <- t:

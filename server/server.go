@@ -33,7 +33,7 @@ func (s *Server) Start(workerPool *worker.Pool) {
 
 	logger.Info("Shutting down server...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
 	if err := e.Shutdown(ctx); err != nil {
@@ -42,7 +42,7 @@ func (s *Server) Start(workerPool *worker.Pool) {
 
 	logger.Info("Server exited gracefully")
 	logger.Info("Stopping worker pool...")
-	workerPool.Stop()
+	workerPool.StopWithContext(ctx)
 }
 
 func New(echo *echo.Echo) *Server {
