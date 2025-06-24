@@ -43,14 +43,22 @@ type RedisConfig struct {
 }
 
 type AsynqConfig struct {
-	RedisAddr   string
-	DB          int
-	Pass        string
-	Concurrency int
-	Queue       string
-	Retention   time.Duration // in hours
-	RetryCount  int
-	Delay       time.Duration // in seconds
+	RedisAddr                        string
+	DB                               int
+	Pass                             string
+	Concurrency                      int
+	Queue                            string
+	Retention                        time.Duration // in hours
+	RetryCount                       int
+	Delay                            time.Duration // in seconds
+	EmailInvitationTaskDelay         time.Duration // in seconds
+	EmailInvitationTaskRetryCount    int
+	EmailInvitationTaskRetryDelay    time.Duration // in seconds
+	EventReminderTaskRetryCount      int
+	EventReminderTaskRetryDelay      time.Duration // in seconds
+	EventReminderEmailTaskDelay      time.Duration // in seconds
+	EventReminderEmailTaskRetryCount int
+	EventReminderEmailTaskRetryDelay time.Duration // in seconds
 }
 
 type JwtConfig struct {

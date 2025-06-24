@@ -16,6 +16,7 @@ var RootCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(serveCmd)
+	RootCmd.AddCommand(workerCmd)
 }
 
 // Execute executes the root command
@@ -32,7 +33,9 @@ func Execute() {
 	conn.InitAsyncInspector()
 	conn.ConnectEmail()
 
-	conn.ConnectWorker()
+	// asynq connections
+	conn.InitAsynqClient()
+	conn.InitAsyncInspector()
 
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)

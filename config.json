@@ -1,7 +1,8 @@
 {
   "app": {
     "name": "app",
-    "port": "8080"
+    "port": "8080",
+    "numberOfWorkers": 5
   },
   "db": {
     "host": "127.0.0.1",
@@ -35,15 +36,27 @@
     "queue": "event-management",
     "retention": 168,
     "retryCount": 25,
-    "delay": 0
+    "delay": 0,
+    "emailInvitationTaskDelay": 0,
+    "emailInvitationTaskRetryCount": 5,
+    "emailInvitationTaskRetryDelay": 30,
+    "eventReminderTaskRetryCount": 5,
+    "eventReminderTaskRetryDelay": 30,
+    "eventReminderEmailTaskDelay": 0,
+    "eventReminderEmailTaskRetryCount": 5,
+    "eventReminderEmailTaskRetryDelay": 30
   },
   "logger": {
     "filePath": "app.log"
   },
   "jwt": {
-    "accessTokenSecret":  "access_token",
-    "refreshTokenSecret":  "refresh_token",
+    "accessTokenSecret": "access_token",
+    "refreshTokenSecret": "refresh_token",
     "accessTokenExpiry": 3600,
     "refreshTokenExpiry": 3600
+  },
+  "email": {
+    "url": "https://webhook.site/d031be56-ce9a-4359-87db-2bc9262ab0e0/email",
+    "timeout": "5s"
   }
 }
