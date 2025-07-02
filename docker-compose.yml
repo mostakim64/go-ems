@@ -100,6 +100,28 @@ services:
     networks:
       - go-ems
 
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: go-ems-worker
+    restart: unless-stopped
+    environment:
+      - CONSUL_URL=http://consul:8500
+      - CONSUL_PATH=app
+    volumes:
+      - ./app.log:/app.log
+    depends_on:
+      mysql:
+        condition: service_healthy
+      consul:
+        condition: service_started
+      redis:
+        condition: service_started
+    entrypoint: ["/app", "worker"]
+    networks:
+      - go-ems
+
 networks:
   go-ems:
     name: go-ems

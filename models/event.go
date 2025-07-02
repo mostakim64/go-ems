@@ -10,7 +10,7 @@ type Event struct {
 	StartTime   *time.Time `json:"start_time" gorm:"column:start_time"`
 	EndTime     *time.Time `json:"end_time" gorm:"column:end_time"`
 	IsPublic    bool       `json:"is_public" gorm:"column:is_public"`
-	Limit       *int       `json:"limit" gorm:"column:limit"`
+	Limit       *int       `json:"limit" gorm:"column:attendee_limit"`
 	CreatedBy   int        `json:"created_by" gorm:"column:created_by"`
 	CreatedAt   time.Time  `json:"-" gorm:"column:created_at"`
 	UpdatedAt   time.Time  `json:"-" gorm:"column:updated_at"`

@@ -20,12 +20,14 @@ import (
 type EventController struct {
 	eventSvc domain.EventService
 	mailSvc  domain.MailService
+	asynqSvc domain.AsynqService
 }
 
-func NewEventController(eventSvc domain.EventService, mailSvc domain.MailService) *EventController {
+func NewEventController(eventSvc domain.EventService, mailSvc domain.MailService, asynqSvc domain.AsynqService) *EventController {
 	return &EventController{
 		eventSvc: eventSvc,
 		mailSvc:  mailSvc,
+		asynqSvc: asynqSvc,
 	}
 }
 
@@ -57,15 +59,22 @@ func (ctrl *EventController) CreateEvent(c echo.Context) error {
 
 	// go func() {
 	if !req.IsPublic {
-		if err := ctrl.mailSvc.SendInvitationEmail(req.Attendees, resp.Event); err != nil {
-			logger.Error("failed to send email: %v", err)
+		// if err := ctrl.mailSvc.SendInvitationEmail(req.Attendees, resp.Event); err != nil {
+		// 	logger.Error("failed to send email: %v", err)
+		// }
+		if err := ctrl.asynqSvc.CreateEmailInvitationTasks(req.Attendees, resp.Event); err != nil {
+			logger.Error("failed to enqueue email invitation tasks: %v", err)
 		}
 	}
 	// }()
 
 	// Enqueue event reminder email notification before the event starts
 	go func() {
-		if err := ctrl.mailSvc.EnqueueEventReminderEmailNotification(resp.Event); err != nil {
+		// if err := ctrl.mailSvc.EnqueueEventReminderEmailNotification(resp.Event); err != nil {
+		// 	logger.Error("failed to enqueue event reminder email notification: %v", err)
+		// }
+
+		if err := ctrl.asynqSvc.CreateEventReminderTask(resp.Event); err != nil {
 			logger.Error("failed to enqueue event reminder email notification: %v", err)
 		}
 	}()

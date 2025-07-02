@@ -1,13 +1,9 @@
 package services
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"time"
 
-	"github.com/vivasoft-ltd/go-ems/config"
 	"github.com/vivasoft-ltd/go-ems/consts"
 	"github.com/vivasoft-ltd/go-ems/domain"
 	"github.com/vivasoft-ltd/go-ems/models"
@@ -18,38 +14,26 @@ import (
 )
 
 type Mail struct {
-	userRepo    domain.UserRepository
-	eventRepo   domain.EventRepository
-	emailClient *http.Client
-	workerPool  *worker.Pool
+	userRepo   domain.UserRepository
+	eventRepo  domain.EventRepository
+	mailRepo   domain.MailRepository
+	workerPool *worker.Pool
 }
 
-func NewMailService(userRepo domain.UserRepository, eventRepo domain.EventRepository, emailClient *http.Client, workerPool *worker.Pool) *Mail {
+func NewMailService(userRepo domain.UserRepository, eventRepo domain.EventRepository, mailRepo domain.MailRepository) *Mail {
 	return &Mail{
-		userRepo:    userRepo,
-		eventRepo:   eventRepo,
-		emailClient: emailClient,
-		workerPool:  workerPool,
+		userRepo:  userRepo,
+		eventRepo: eventRepo,
+		mailRepo:  mailRepo,
 	}
 }
 
 func (m *Mail) SendEmail(reqData types.EmailPayload) error {
-	reqURL := config.Email().Url
-	reqByte, _ := json.Marshal(reqData)
-
-	req, err := http.NewRequest(http.MethodPost, reqURL, bytes.NewBuffer(reqByte))
+	err := m.mailRepo.SendEmail(&reqData)
 	if err != nil {
-		logger.Error(err, " while creating email request to: ", reqData.MailTo)
+		logger.Error(fmt.Sprintf("err: []%v occurred while sending email to: %s", err, reqData.MailTo))
 		return err
 	}
-
-	res, err := m.emailClient.Do(req)
-	if err != nil {
-		logger.Error(err, " on email send to: ", reqData.MailTo)
-		return err
-	}
-
-	logger.Info(fmt.Sprintf("email service status code [%v] after email send to: %v ", res.StatusCode, reqData.MailTo))
 	return nil
 }
 

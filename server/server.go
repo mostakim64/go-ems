@@ -9,7 +9,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/vivasoft-ltd/go-ems/config"
-	"github.com/vivasoft-ltd/go-ems/worker"
 	"github.com/vivasoft-ltd/golang-course-utils/logger"
 )
 
@@ -17,7 +16,7 @@ type Server struct {
 	echo *echo.Echo
 }
 
-func (s *Server) Start(workerPool *worker.Pool) {
+func (s *Server) Start() {
 	e := s.echo
 	// Start server in a goroutine
 	go func() {
@@ -41,8 +40,6 @@ func (s *Server) Start(workerPool *worker.Pool) {
 	}
 
 	logger.Info("Server exited gracefully")
-	logger.Info("Stopping worker pool...")
-	workerPool.StopWithContext(ctx)
 }
 
 func New(echo *echo.Echo) *Server {
