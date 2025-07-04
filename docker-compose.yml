@@ -19,7 +19,7 @@ services:
     restart: unless-stopped
     volumes:
       - vivasoft_mysql_golang_course_local_db:/var/lib/mysql
-      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./docs/init_db.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       - MYSQL_USER=gladiator
       - MYSQL_PASSWORD=gladius
@@ -27,8 +27,6 @@ services:
       - MYSQL_DATABASE=event_management
     ports:
       - "3307:3306"
-    expose:
-      - 3306
     networks:
       - go-ems
     healthcheck:
@@ -45,14 +43,10 @@ services:
     restart: unless-stopped
     ports:
       - "6380:6379"
-    expose:
-      - 6379
     environment:
       - REDIS_PASSWORD=password123
     volumes:
-      - type: volume
-        source: vivasoft_redis_golang_course_local_db
-        target: /bitnami/redis/data:rw
+      - vivasoft_redis_golang_course_local_db:/bitnami/redis/data
     networks:
       - go-ems
 
@@ -69,8 +63,6 @@ services:
       - REDIS_PASSWORD=password123
     ports:
       - "9001:8080"
-    expose:
-      - "9000"
     networks:
       - go-ems
 
@@ -79,11 +71,11 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: go-ems
+    command:
+      - serve
     restart: unless-stopped
     ports:
       - "8080:8080"
-    expose:
-      - 8080
     environment:
       - CONSUL_URL=http://consul:8500
       - CONSUL_PATH=app
@@ -96,7 +88,6 @@ services:
         condition: service_started
       redis:
         condition: service_started
-    entrypoint: ["/app", "serve"]
     networks:
       - go-ems
 
@@ -105,6 +96,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: go-ems-worker
+    command:
+      - worker
     restart: unless-stopped
     environment:
       - CONSUL_URL=http://consul:8500
@@ -118,9 +111,24 @@ services:
         condition: service_started
       redis:
         condition: service_started
-    entrypoint: ["/app", "worker"]
     networks:
       - go-ems
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
 
 networks:
   go-ems:

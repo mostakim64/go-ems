@@ -19,7 +19,11 @@
     "port": "6379",
     "pass": "password123",
     "db": 2,
-    "mandatoryPrefix": "event_management_"
+    "mandatoryPrefix": "event_management_",
+    "userPrefix": "user_",
+    "permissionPrefix": "permissions_",
+    "accessUuidPrefix": "access-uuid_",
+    "refreshUuidPrefix": "refresh-uuid_"
   },
   "asynq": {
     "redisAddr": "redis:6379",
@@ -34,5 +38,15 @@
   "logger": {
     "level": "debug",
     "filePath": "app.log"
+  },
+  "jwt": {
+    "accessTokenSecret": "access_token",
+    "refreshTokenSecret": "refresh_token",
+    "accessTokenExpiry": 3600,
+    "refreshTokenExpiry": 3600
+  },
+  "email": {
+    "url": "https://webhook.site/d031be56-ce9a-4359-87db-2bc9262ab0e0/email",
+    "timeout": "5s"
   }
 }
