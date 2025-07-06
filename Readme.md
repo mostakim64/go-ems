@@ -223,7 +223,26 @@ aws ecr get-login-password --region <your-region> \
 
 ---
 
-## 🐳 Step 4: Deploy with Docker Compose
+## Step 4: Deploy with Docker Compose
+Build Docker image for **Linux amd64 architecture**
+
+```bash
+docker build -t <aws_account_id>.dkr.ecr.<region>.amazonaws.com/<repository_name>:latest . \
+  --platform linux/amd64
+```
+
+Push the image to ECR
+
+```bash
+docker push <aws_account_id>.dkr.ecr.<region>.amazonaws.com/<repository_name>:latest
+```
+
+**Authenticate to ECR** before pushing:
+
+```bash
+aws ecr get-login-password --region <region> \
+  | docker login --username AWS --password-stdin <aws_account_id>.dkr.ecr.<region>.amazonaws.com
+```
 
 Pull latest images:
 
@@ -239,7 +258,7 @@ docker compose -f docker-compose.yml up -d
 
 ---
 
-## 📊 Step 5: Access and Configure Grafana
+## Step 5: Access and Configure Grafana
 
 * Visit: `http://<your-ec2-public-ip>:3000`
 * Default login: `admin / admin`
@@ -263,7 +282,7 @@ docker compose -f docker-compose.yml up -d
 
 ---
 
-## ✅ Monitoring & Troubleshooting
+## Monitoring & Troubleshooting
 
 Check container status:
 
