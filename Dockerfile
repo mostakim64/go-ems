@@ -20,6 +20,7 @@ COPY ./ ./
 
 # Build the Go app
 RUN CGO_ENABLED=0 GOFLAGS=-mod=vendor GOOS=linux go build -a -installsuffix 'static' -o /app .
+#RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o main.
 
 ######## Start a new stage from scratch #######
 # Final stage: the running container.
