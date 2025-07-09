@@ -1,9 +1,13 @@
 package middlewares
 
 import (
+	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	m "github.com/labstack/echo/v4/middleware"
-	"github.com/vivasoft-ltd/golang-course-utils/monitor"
+)
+
+const (
+	promSubsystemName = "vivasoft"
 )
 
 func Init(e *echo.Echo) {
@@ -19,13 +23,11 @@ func Init(e *echo.Echo) {
 	e.Use(m.CORS())
 	e.Use(m.Secure())
 	e.Use(m.Recover())
-
 	e.Use(m.GzipWithConfig(m.GzipConfig{
 		Skipper: func(context echo.Context) bool {
 			return context.Request().URL.Path == metricsPath
 		},
 		Level: 5,
 	}))
-
-	monitor.NewEchoPrometheusClient(e, &metricsPath)
+	e.Use(echoprometheus.NewMiddleware(promSubsystemName)) // adds middleware to gather metrics
 }
