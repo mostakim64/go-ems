@@ -1,0 +1,7 @@
+services:
+  k6:
+    image: grafana/k6:latest
+    container_name: k6
+    volumes:
+      - .:/scripts
+    entrypoint: ["k6", "run", "/scripts/api_test.js"]

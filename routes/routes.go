@@ -1,8 +1,8 @@
 package routes
 
 import (
+	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/vivasoft-ltd/go-ems/consts"
 	"github.com/vivasoft-ltd/go-ems/controllers"
 	m "github.com/vivasoft-ltd/go-ems/middlewares"
@@ -30,7 +30,7 @@ func (r *Routes) Init() {
 	e := r.echo
 	m.Init(e)
 	// APM routes
-	e.GET("/metrics", echo.WrapHandler(promhttp.Handler()))
+	e.GET("/metrics", echoprometheus.NewHandler())
 
 	g := e.Group("/v1")
 
