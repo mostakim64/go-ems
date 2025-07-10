@@ -7,7 +7,6 @@ require (
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/hibiken/asynq v0.25.1
 	github.com/labstack/echo/v4 v4.13.4
-	github.com/prometheus/client_golang v1.22.0
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.20.1
 	github.com/spf13/viper/remote v1.20.1
@@ -17,10 +16,15 @@ require (
 )
 
 require (
-	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
+	go.uber.org/mock v0.5.2
+)
+
+require (
+	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.1 // indirect
 	github.com/hashicorp/go-metrics v0.5.4 // indirect
+	github.com/prometheus/client_golang v1.22.0 // indirect
 )
 
 require (
