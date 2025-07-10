@@ -16,7 +16,10 @@ require (
 	gorm.io/gorm v1.26.0
 )
 
-require github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496 // indirect
+require (
+	github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496 // indirect
+	go.uber.org/mock v0.5.2 // indirect
+)
 
 require (
 	cloud.google.com/go v0.116.0 // indirect
